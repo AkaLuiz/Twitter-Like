@@ -1,5 +1,6 @@
-
 import { Link, useNavigate } from 'react-router-dom';
+import Logo from '../../components/logo';
+
 function Cadastro({cadastrar, eventoTeclado}){
 
     const navigate = useNavigate();
@@ -11,16 +12,19 @@ function Cadastro({cadastrar, eventoTeclado}){
         });
     }
     return(
-        <div>
-            NÃO UTILIZE UMA SENHA QUE VOCÊ USA COM FREQUÊNCIA
-            <form> 
-                <input type='text' placeholder='nome' name='nome' onChange={eventoTeclado} required></input>
-                <input type='e-mail' placeholder='e-mail' name='email' onChange={eventoTeclado} required></input>
-                <input type='password' placeholder='senha' name='senha' onChange={eventoTeclado} required></input>
-                <Link to='/login'
-                >possui cadastro?</Link>
-                <input onClick={handleCadastro} type='button' value='CADASTRAR'></input>
-            </form>
+        <div className="tela-auth">
+            <div className="cartao-auth">
+                <Logo tamanho={32}/>
+                <h1>Cadastre-se</h1>
+                <form className="formulario-auth" onSubmit={(e) => e.preventDefault()}>
+                    <input className="campo" type='text' placeholder='nome' name='nome' onChange={eventoTeclado} required/>
+                    <input className="campo" type='email' placeholder='e-mail' name='email' onChange={eventoTeclado} required/>
+                    <input className="campo" type='password' placeholder='senha' name='senha' onChange={eventoTeclado} required/>
+                    <button className="botao-primario" type="button" onClick={handleCadastro}>Cadastrar</button>
+                </form>
+                <Link className="link-sutil" to='/login'>possui cadastro?</Link>
+                <p className="aviso-auth">Não utilize uma senha que você usa com frequência</p>
+            </div>
         </div>
     )
 }

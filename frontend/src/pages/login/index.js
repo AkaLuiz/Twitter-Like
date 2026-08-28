@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { salvarUsuarioLogado } from '../../utils/auth';
+import Logo from '../../components/logo';
 
 function Login({logar}){
-    const[nome, setNome] = useState([]);
-    const[senha, setSenha] = useState([]);
+    const[nome, setNome] = useState('');
+    const[senha, setSenha] = useState('');
     const navigate = useNavigate();
     const handleLogin = async () => {
         try{
@@ -18,16 +19,20 @@ function Login({logar}){
             console.error("Erro ao fazer login:", error);
         }
     }
-    
+
     return(
-        <div>
-            <form>
-                <input type='text' placeholder='nome' onChange={(e) => setNome(e.target.value)} value={nome}></input>
-                <input type='text' placeholder='senha' onChange={(e) => setSenha(e.target.value)} value={senha}></input>
-                <Link to='/cadastro'
-                >Não possui cadastro?</Link>
-                <input type='button' onClick={handleLogin} value='Entrar'></input>
-            </form>
+        <div className="tela-auth">
+            <div className="cartao-auth">
+                <Logo tamanho={32}/>
+                <h1>Login</h1>
+                <form className="formulario-auth" onSubmit={(e) => e.preventDefault()}>
+                    <input className="campo" type='text' placeholder='nome' onChange={(e) => setNome(e.target.value)} value={nome}/>
+                    <input className="campo" type='password' placeholder='senha' onChange={(e) => setSenha(e.target.value)} value={senha}/>
+                    <span className="link-sutil">esqueceu sua senha?</span>
+                    <button className="botao-primario" type="button" onClick={handleLogin}>Entrar</button>
+                </form>
+                <Link className="link-sutil" to='/cadastro'>Não possui cadastro?</Link>
+            </div>
         </div>
     )
 }

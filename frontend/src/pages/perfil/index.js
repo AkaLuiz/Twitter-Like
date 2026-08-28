@@ -21,12 +21,11 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
           .then(retorno_convertido => setUsuario(retorno_convertido));
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [id]);
-    
+
 
       const seguidores = vetorS.find(follow => follow.usuarioSeguidoId === id && follow.usuarioSeguindoId === usuarioLogado);
       const botaoSeguir = seguidores ? true : false;
-      console.log(botaoSeguir);
-      
+
       //seguido, seguindo
       const handleSeguir = () => {
         if(botaoSeguir === false){
@@ -50,25 +49,29 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
         if(botao === false){
             repostar(postId, usuarioLogado);
         }
-        
-        
+
+
         else{
             desrepostar(postId, repostId);
         }
     }
 
-      
-
     return(
-        <>
+        <div className="tela-perfil">
+            <Link className="link-sutil" to="/inicio">← início</Link>
             {
                 usuarioLogado === id
                 ?
                 <div>
-                    <p>Perfil de: {usuario.nome || "Carregando..." }</p>
-                    <p>seguidores: {usuario.seguidores}</p>
-                    <p>seguindo: {usuario.seguindo}</p>
+                    <div className="cabecalho-perfil">
+                        <h2>{usuario.nome || "Carregando..." }</h2>
+                        <div className="estatisticas-perfil">
+                            <span>{usuario.seguidores ?? 0} seguidores</span>
+                            <span>{usuario.seguindo ?? 0} seguindo</span>
+                        </div>
+                    </div>
 
+                    <div className="lista-posts">
                     {
                         vetorInvertido.map((obj, indice) => {
 
@@ -94,60 +97,48 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                             const idUsuarioDaPostagemRepostada = postagemRepostada ? postagemRepostada.usuarioPostagemId : "Usuário sem Id"
 
                             return(
-                                <>  
+                                <>
                                 {
                                     postagemDono
                                     ?
-                                    <fieldset>
-                                    <p>{donoRepost}</p>
-                                    <Link to={`/perfil/${id}`}
-                                    >{usuario.nome}
-                                    </Link>
-                                    <p>{obj.texto}</p>
+                                    <div className="post-card">
+                                    <p className="post-repost-de">{donoRepost}</p>
+                                    <div className="post-cabecalho">
+                                        <span className="avatar"></span>
+                                        <Link className="post-handle" to={`/perfil/${id}`}
+                                        >@{usuario.nome}
+                                        </Link>
+                                    </div>
+                                    <p className="post-texto">{obj.texto}</p>
 
-                                    {   
+                                    <div className="post-acoes">
+                                    {
                                         !repostagem
                                         ?
-                                        <input
-                                        type="button"
-                                        value={"Remover"}
-                                        onClick={() => remover(obj.postagemId)}
-                                        />
+                                        <button className="post-acao" onClick={() => remover(obj.postagemId)}>Remover</button>
                                         :
-                                        <div></div>
+                                        null
                                     }
-    
-                                    <input
-                                        type="button"
-                                        value={botaoCurtida ? "Descurtir" : "Curtir"}
-                                        onClick={() => handleCurtir(botaoCurtida, obj.postagemId, idCurtida)}
-                                    /> {obj.curtidas}
+
+                                    <button className="post-acao" onClick={() => handleCurtir(botaoCurtida, obj.postagemId, idCurtida)}>
+                                        {botaoCurtida ? "Descurtir" : "Curtir"} · {obj.curtidas}
+                                    </button>
 
                                     {
-                                        botaoRepost 
+                                        botaoRepost
                                         ?
-                                        <div>
-                                            <input
-                                            type="button"
-                                            value={"Remover repost"}
-                                            onClick={() => handleRepost(botaoRepost, idPostRepostado, idRepostagem)}
-                                            /> {obj.reposts}
-                                        </div>
-            
+                                        <button className="post-acao" onClick={() => handleRepost(botaoRepost, idPostRepostado, idRepostagem)}>
+                                            Remover repost · {obj.reposts}
+                                        </button>
                                         :
-                                        <div>
-                                            <input
-                                            type="button"
-                                            value={"Repostar"}
-                                            onClick={() => handleRepost(botaoRepost, idPostRepostado, idRepostagem)}
-                                            /> {obj.reposts}
-                                        </div>
-                                        
+                                        <button className="post-acao" onClick={() => handleRepost(botaoRepost, idPostRepostado, idRepostagem)}>
+                                            Repostar · {obj.reposts}
+                                        </button>
                                     }
-                                    
-            
-                                    <p>Comentários: {obj.comentarios}</p>
-                                    </fieldset>
+
+                                    <span className="post-comentarios">{obj.comentarios} comentários</span>
+                                    </div>
+                                    </div>
                                     :
                                     <></>
                                 }
@@ -155,18 +146,22 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                                 )
                         })
                     }
+                    </div>
 
                 </div>
 
                 :
                 <div>
-                    <p>Perfil de: {usuario.nome || "Carregando..." }</p>
-                    <p>seguidores: {usuario.seguidores}</p>
-                    <p>seguindo: {usuario.seguindo}</p>
+                    <div className="cabecalho-perfil">
+                        <h2>{usuario.nome || "Carregando..." }</h2>
+                        <div className="estatisticas-perfil">
+                            <span>{usuario.seguidores ?? 0} seguidores</span>
+                            <span>{usuario.seguindo ?? 0} seguindo</span>
+                        </div>
+                        <button className="botao-primario" onClick={handleSeguir}>{botaoSeguir ? "Desseguir" : "Seguir"}</button>
+                    </div>
 
-
-                    <input type='button' onClick={handleSeguir} value={botaoSeguir ? "Desseguir" : "Seguir"}></input>
-
+                    <div className="lista-posts">
                     {
                         vetorInvertido.map((obj, indice) => {
 
@@ -192,47 +187,39 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                             const idUsuarioDaPostagemRepostada = postagemRepostada ? postagemRepostada.usuarioPostagemId : "Usuário sem Id"
 
                             return(
-                                <>  
+                                <>
                                 {
                                     postagemDono
                                     ?
-                                    <fieldset>
-                                    <p>{usuario.nome}</p>
-                                    <Link to={`/perfil/${id}`}
-                                    >{usuario.nome}
-                                    </Link>
-                                    <p>{obj.texto}</p>
-    
-                                    <input
-                                        type="button"
-                                        value={botaoCurtida ? "Descurtir" : "Curtir"}
-                                        onClick={() => handleCurtir(botaoCurtida, obj.postagemId, idCurtida)}
-                                    /> {obj.curtidas}
+                                    <div className="post-card">
+                                    <p className="post-repost-de">{donoRepost}</p>
+                                    <div className="post-cabecalho">
+                                        <span className="avatar"></span>
+                                        <Link className="post-handle" to={`/perfil/${id}`}
+                                        >@{usuario.nome}
+                                        </Link>
+                                    </div>
+                                    <p className="post-texto">{obj.texto}</p>
+
+                                    <div className="post-acoes">
+                                    <button className="post-acao" onClick={() => handleCurtir(botaoCurtida, obj.postagemId, idCurtida)}>
+                                        {botaoCurtida ? "Descurtir" : "Curtir"} · {obj.curtidas}
+                                    </button>
                                     {
-                                        botaoRepost 
+                                        botaoRepost
                                         ?
-                                        <div>
-                                            <input
-                                            type="button"
-                                            value={"Remover repost"}
-                                            onClick={() => handleRepost(botaoRepost, idPostRepostado, idRepostagem)}
-                                            /> {obj.reposts}
-                                        </div>
-            
+                                        <button className="post-acao" onClick={() => handleRepost(botaoRepost, idPostRepostado, idRepostagem)}>
+                                            Remover repost · {obj.reposts}
+                                        </button>
                                         :
-                                        <div>
-                                            <input
-                                            type="button"
-                                            value={"Repostar"}
-                                            onClick={() => handleRepost(botaoRepost, idPostRepostado, idRepostagem)}
-                                            /> {obj.reposts}
-                                        </div>
-                                        
+                                        <button className="post-acao" onClick={() => handleRepost(botaoRepost, idPostRepostado, idRepostagem)}>
+                                            Repostar · {obj.reposts}
+                                        </button>
                                     }
-                                    
-            
-                                    <p>Comentários: {obj.comentarios}</p>
-                                    </fieldset>
+
+                                    <span className="post-comentarios">{obj.comentarios} comentários</span>
+                                    </div>
+                                    </div>
                                     :
                                     <></>
                                 }
@@ -241,11 +228,12 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                                 )
                         })
                     }
+                    </div>
 
                 </div>
             }
-            
-        </>
+
+        </div>
     )
 }
 

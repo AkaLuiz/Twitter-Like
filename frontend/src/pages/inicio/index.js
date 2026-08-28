@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import PostComp from '../../components/postagemComp';
+import Logo from '../../components/logo';
 import { useEffect, useState } from 'react';
 import { obterUsuarioLogado, limparUsuarioLogado } from '../../utils/auth';
 
@@ -9,7 +10,7 @@ function Inicio({postar, remover, repostar, desrepostar, vetorR, vetorP, vetorU,
     const usuarioLogado = obterUsuarioLogado();
     const nomeUsuario = usuarioLogado?.nome;
     const id = usuarioLogado?.usuarioId;
-    const [texto, setTexto] = useState([]);
+    const [texto, setTexto] = useState('');
     const [objPostagem, setObjPostagem] = useState({
         usuarioPostagemId: id,
         texto: texto
@@ -40,34 +41,51 @@ function Inicio({postar, remover, repostar, desrepostar, vetorR, vetorP, vetorU,
         navigate('/login');
     }
 
-    return (
-        <div>
-            <center>
-            <table>
+    const handlePostar = async () => {
+        const sucesso = await postar(objPostagem);
+        if (sucesso) {
+            setTexto('');
+        }
+    }
 
-                <tbody>
-                    <tr>
-                        <td>
-                        <input type='button' onClick={handlePerfil} value='Perfil'></input>
-                        <input type='button' onClick={handleSair} value='Sair'></input>
-                        </td>
-                        <td>
-                        <center>
-                            <h1>Bem-vindo, {nomeUsuario || 'Usuário desconhecido'}!</h1> {/* Exibe o nome do usuário ou "Usuário" como padrão */}
-                            <p>Poste algo:</p>
-                            <form>
-                            <textarea placeholder='Digita um trem aí...' name='texto' onChange={(e) => setTexto(e.target.value)} required/>
-                            <input onClick={() => postar(objPostagem)} type='button'  value='Postar'/>
-                            </form>
-                            <PostComp vetorR={vetorR} vetorP={vetorP} vetorU={vetorU} vetorC={vetorC} remover={remover} 
-                            repostar={repostar} desrepostar={desrepostar} curtir={curtir} descurtir={descurtir}
-                            idUsuarioLogado={id} nomeUsuarioLogado={nomeUsuario} botaoCurtida={botaoCurtida} selecionar={selecionar}/>
-                        </center> 
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            </center>
+    return (
+        <div className="layout-app">
+            <aside className="barra-lateral">
+                <Logo tamanho={26}/>
+                <div className="usuario-chip">
+                    <span className="avatar"></span>
+                    <span>@{nomeUsuario || 'usuário'}</span>
+                </div>
+                <nav className="nav-lista">
+                    <button className="nav-item ativo">Início</button>
+                    <button className="nav-item inerte" title="Em construção">Procurar</button>
+                    <button className="nav-item inerte" title="Em construção">Notificações</button>
+                    <button className="nav-item inerte" title="Em construção">Papo</button>
+                    <button className="nav-item" onClick={handlePerfil}>Perfil</button>
+                    <button className="nav-item inerte" title="Em construção">Configurações</button>
+                </nav>
+                <button className="link-sutil sair" onClick={handleSair}>sair</button>
+            </aside>
+
+            <main className="feed">
+                <div className="compositor">
+                    <textarea
+                        className="campo"
+                        placeholder='Digita um trem aí...'
+                        value={texto}
+                        onChange={(e) => setTexto(e.target.value)}
+                        required
+                    />
+                    <button className="botao-primario" onClick={handlePostar}>Postar</button>
+                </div>
+                <PostComp vetorR={vetorR} vetorP={vetorP} vetorU={vetorU} vetorC={vetorC} remover={remover}
+                repostar={repostar} desrepostar={desrepostar} curtir={curtir} descurtir={descurtir}
+                idUsuarioLogado={id} nomeUsuarioLogado={nomeUsuario} botaoCurtida={botaoCurtida} selecionar={selecionar}/>
+            </main>
+
+            <aside className="coluna-busca">
+                <input className="campo campo-busca" type="text" placeholder="Buscar" title="Em construção" disabled/>
+            </aside>
         </div>
     );
 }

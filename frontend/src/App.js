@@ -1,11 +1,11 @@
 import './App.css';
 import { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Inicio from './pages/inicio/index';
 import Cadastro from './pages/cadastro/index';
 import Login from './pages/login/index';
 import Perfil from './pages/perfil/index';
-import { obterToken } from './utils/auth';
+import { obterToken, obterUsuarioLogado } from './utils/auth';
 
 function App() {
   //cabeçalhos usados em toda chamada que exige login
@@ -497,13 +497,18 @@ function App() {
       setBtnCadastrar(true)
     }
 
+  //pra onde mandar quem cai numa rota sem destino (raiz ou desconhecida)
+  const destinoPadrao = obterUsuarioLogado() ? '/inicio' : '/login';
+
   return (
     <Router >
         <Routes>
+          <Route path='/' element={<Navigate to={destinoPadrao} replace/>}/>
           <Route path='/inicio' element={<Inicio postar={postarPost} remover={removerPost} repostar={repostarPost} desrepostar={desrepostarPost} vetorR={reposts} vetorP={postagens} vetorU={usuarios} vetorC={curtidas} curtir={curtirPost} descurtir={descurtirPost}/>}/>
           <Route path='/cadastro' element={<Cadastro cadastrar={cadastrarUsuario} eventoTeclado={aoDigitarUsu}/>}/>
           <Route path='/login' element={<Login logar={entrar}/>}/>
           <Route path='/perfil/:id' element={<Perfil seguir={seguirUsuario} desseguir={desseguirUsuario} postar={postarPost} remover={removerPost} curtir={curtirPost} descurtir={descurtirPost} repostar={repostarPost} desrepostar={desrepostarPost} vetorS={seguidores} vetorP={postagens} vetorR={reposts} vetorU={usuarios} vetorC={curtidas}/>}/>
+          <Route path='*' element={<Navigate to={destinoPadrao} replace/>}/>
         </Routes>
     </Router>
   );
