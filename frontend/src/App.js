@@ -6,6 +6,7 @@ import Cadastro from './pages/cadastro/index';
 import Login from './pages/login/index';
 import Perfil from './pages/perfil/index';
 import { obterToken, obterUsuarioLogado } from './utils/auth';
+import { API_URL } from './utils/api';
 
 function App() {
   //cabeçalhos usados em toda chamada que exige login
@@ -73,35 +74,35 @@ function App() {
 
   //UseEffect Postagens
   useEffect(() => {
-    fetch('http://localhost:8090/liste/postagens')
+    fetch(API_URL + '/liste/postagens')
     .then(retorno => retorno.json())
     .then(retorno_convertido => setPostagens(retorno_convertido))
   }, [])
 
   //UseEffect Usuarios
   useEffect(() => {
-    fetch('http://localhost:8090/liste/usuarios')
+    fetch(API_URL + '/liste/usuarios')
       .then(retorno => retorno.json())
       .then(retorno_convertido => setUsuarios(retorno_convertido));
   }, []);
 
     //UseEffect Seguidores
     useEffect(() => {
-      fetch('http://localhost:8090/liste/seguidores')
+      fetch(API_URL + '/liste/seguidores')
         .then(retorno => retorno.json())
         .then(retorno_convertido => setSeguidores(retorno_convertido));
     }, []);
 
     //UseEffect Curtidas
     useEffect(() => {
-      fetch('http://localhost:8090/liste/curtidas')
+      fetch(API_URL + '/liste/curtidas')
         .then(retorno => retorno.json())
         .then(retorno_convertido => setCurtidas(retorno_convertido));
     }, []);
 
       //UseEffect Reposts
       useEffect(() => {
-        fetch('http://localhost:8090/liste/reposts')
+        fetch(API_URL + '/liste/reposts')
           .then(retorno => retorno.json())
           .then(retorno_convertido => setReposts(retorno_convertido));
       }, []);
@@ -114,7 +115,7 @@ function App() {
 
   // postar lol '-'
   const postarPost = (objPostagem) => {
-    return fetch('http://localhost:8090/poste', {
+    return fetch(API_URL + '/poste', {
       method: 'POST',
       body: JSON.stringify(objPostagem),
       headers: cabecalhosAutenticados()
@@ -136,7 +137,7 @@ function App() {
 
     // Repostar 
     const repostarPost = (postagemId, usuarioId) => {
-      return fetch('http://localhost:8090/reposte/' + postagemId + '/usuarios/' + usuarioId, {
+      return fetch(API_URL + '/reposte/' + postagemId + '/usuarios/' + usuarioId, {
         method: 'POST',
         body: JSON.stringify(objPostagem),
         headers: cabecalhosAutenticados()
@@ -157,7 +158,7 @@ function App() {
     }
 
     const desrepostarPost = (postagemId, repostagemId) => {
-      fetch('http://localhost:8090/desreposte/' + postagemId + '/repost/' + repostagemId, {
+      fetch(API_URL + '/desreposte/' + postagemId + '/repost/' + repostagemId, {
         method: 'DELETE',
         headers: cabecalhosAutenticados()
       })
@@ -197,7 +198,7 @@ function App() {
     }
 
   const comentar = () => {
-    fetch('http://localhost:8090/comente/' + objPostagem.postagemId, {
+    fetch(API_URL + '/comente/' + objPostagem.postagemId, {
       method: 'post',
       body: JSON.stringify(objPostagem),
       headers: cabecalhosAutenticados()
@@ -216,7 +217,7 @@ function App() {
   }
 
   const removerPost = (postagemId) => {
-    fetch('http://localhost:8090/remove/postagem/' + postagemId, {
+    fetch(API_URL + '/remove/postagem/' + postagemId, {
       method: 'DELETE',
       headers: cabecalhosAutenticados()
     })
@@ -246,7 +247,7 @@ function App() {
 
   //Alterar postagem
   const editarPost = () => {
-    fetch('http://localhost:8090/edite/postagem', {
+    fetch(API_URL + '/edite/postagem', {
       method: 'put',
       body: JSON.stringify(objPostagem),
       headers: cabecalhosAutenticados()
@@ -282,7 +283,7 @@ function App() {
 
   //curtir
   const curtirPost = (postagemId, usuarioId) => {
-      return fetch('http://localhost:8090/curte/postagem/' + postagemId + '/usuario/' + usuarioId, {
+      return fetch(API_URL + '/curte/postagem/' + postagemId + '/usuario/' + usuarioId, {
         method: 'PUT',
         body: JSON.stringify(objPostagem),
         headers: cabecalhosAutenticados()
@@ -297,7 +298,7 @@ function App() {
 
   //descurtir
   const descurtirPost = (postagemId, usuarioId, curtidaId) => {
-      return fetch('http://localhost:8090/descurte/postagem/' + postagemId + '/usuario/' + usuarioId + '/curtida/' + curtidaId, {
+      return fetch(API_URL + '/descurte/postagem/' + postagemId + '/usuario/' + usuarioId + '/curtida/' + curtidaId, {
         method: 'PUT',
         body: JSON.stringify(objPostagem),
         headers: cabecalhosAutenticados()
@@ -312,7 +313,7 @@ function App() {
 
   //cadastrar usuario
   const cadastrarUsuario = () => {
-    return fetch('http://localhost:8090/cadastre/usuarios', {
+    return fetch(API_URL + '/cadastre/usuarios', {
       method: 'post',
       body: JSON.stringify(objUsuario),
       headers: {
@@ -342,7 +343,7 @@ function App() {
 
   //entrar na conta
   const entrar = (nome, senha) => {
-    return fetch('http://localhost:8090/login', {
+    return fetch(API_URL + '/login', {
       method: 'post',
       body: JSON.stringify({ nome, senha }),
       headers: {
@@ -363,7 +364,7 @@ function App() {
 
   //remover usuario
   const removerUsuario = () => {
-    fetch('http://localhost:8090/remove/usuarios/' + objUsuario.usuarioId, {
+    fetch(API_URL + '/remove/usuarios/' + objUsuario.usuarioId, {
       method: 'delete',
       headers: cabecalhosAutenticados()
     })
@@ -394,7 +395,7 @@ function App() {
 
     //alterar usuario
     const alterarUsuario = () => {
-      fetch('http://localhost:8090/altere/usuarios', {
+      fetch(API_URL + '/altere/usuarios', {
         method: 'put',
         body: JSON.stringify(objUsuario),
         headers: cabecalhosAutenticados()
@@ -430,7 +431,7 @@ function App() {
 
   //seguir usuario
   const seguirUsuario = (seguidoId, seguindoId) => {
-    fetch('http://localhost:8090/segue/usuarios/' + seguidoId + '/usuarios/' + seguindoId, {
+    fetch(API_URL + '/segue/usuarios/' + seguidoId + '/usuarios/' + seguindoId, {
       method: 'post',
       headers: cabecalhosAutenticados()
     })
@@ -449,7 +450,7 @@ function App() {
   
     //desseguir usuario
     const desseguirUsuario = (seguidoId, seguindoId) => {
-      fetch('http://localhost:8090/dessegue/usuarios/' + seguidoId + '/usuarios/' + seguindoId, {
+      fetch(API_URL + '/dessegue/usuarios/' + seguidoId + '/usuarios/' + seguindoId, {
         method: 'delete',
         body: JSON.stringify(objSeguidor),
         headers: cabecalhosAutenticados()

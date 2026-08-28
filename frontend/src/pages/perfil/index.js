@@ -1,6 +1,7 @@
 import {useState, useEffect} from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { obterUsuarioLogado } from '../../utils/auth';
+import { API_URL } from '../../utils/api';
 function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar, desrepostar, vetorS, vetorP, vetorR, vetorU, vetorC}){
 
     const { id: idParam } = useParams();
@@ -16,7 +17,7 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
             navigate('/login');
             return;
         }
-        fetch('http://localhost:8090/liste/usuarios/' + id)
+        fetch(API_URL + '/liste/usuarios/' + id)
           .then(retorno => retorno.json())
           .then(retorno_convertido => setUsuario(retorno_convertido));
         // eslint-disable-next-line react-hooks/exhaustive-deps

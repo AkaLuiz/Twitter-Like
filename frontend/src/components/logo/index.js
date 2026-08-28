@@ -3,15 +3,16 @@ function Logo({ tamanho = 32 }) {
         <svg
             className="logo-marca"
             width={tamanho}
-            height={tamanho * 1.35}
-            viewBox="0 0 28 40"
+            height={tamanho * (30 / 28)}
+            viewBox="0 0 28 30"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
         >
+            {/* dois "Y" - um normal, um de ponta cabeça - encostando só numa perna cada */}
             <path
-                d="M4 2 L11 19 L5 25 L14 38 L21 13 L15 20 L24 2"
+                d="M5 2 L14 12 L23 2 M14 12 L14 26 M14 26 L8 18 L2 26 M8 18 L8 4"
                 stroke="currentColor"
-                strokeWidth="4"
+                strokeWidth="3"
                 strokeLinecap="round"
                 strokeLinejoin="round"
             />
