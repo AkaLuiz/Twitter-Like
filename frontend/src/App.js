@@ -422,19 +422,19 @@ function App() {
       method: 'post',
       headers: cabecalhosAutenticados()
     })
-    .then(retorno => retorno.json())
-    .then(retorno_convertido => {
-      if(retorno_convertido.mensagem !== undefined){
-        toast.error(retorno_convertido.mensagem)
+    .then(async retorno => ({ ok: retorno.ok, dados: await retorno.json() }))
+    .then(({ ok, dados }) => {
+      if (!ok) {
+        toast.error(dados.mensagem)
+        return;
       }
-      else{
-        buscarSeguidores()
-        toast.success("Usuário seguido!")
-        limparFormularioSeguidores()
-      }
+      toast.success(dados.mensagem)
+      buscarSeguidores()
+      buscarUsuarios()
+      limparFormularioSeguidores()
     })
   }
-  
+
     //desseguir usuario
     const desseguirUsuario = (seguidoId, seguindoId) => {
       fetch(API_URL + '/dessegue/usuarios/' + seguidoId + '/usuarios/' + seguindoId, {
@@ -452,6 +452,7 @@ function App() {
         toast.success(dados.mensagem);
 
         buscarSeguidores()
+        buscarUsuarios()
 
         //limpar formulario
         limparFormularioSeguidores();

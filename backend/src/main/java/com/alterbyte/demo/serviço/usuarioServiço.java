@@ -195,13 +195,9 @@ public class usuarioServiço {
         Optional<usuarioModelo> usuarioSeguido = ur.findById(usuarioSeguidoId);
         Optional<usuarioModelo> usuarioSeguindo = ur.findById(usuarioSeguindoId);
 
-        for(Long i = (long)0; i <= sr.count(); i ++){
-            if(sr.findById(i).isPresent()){
-                if(sr.findById(i).get().getUsuarioSeguidoId().equals(usuarioSeguidoId) && sr.findById(i).get().getUsuarioSeguindoId().equals(usuarioSeguindoId)){
-                    rm.setMensagem("Você já segue essa pessoa!");
-                    return new ResponseEntity<respostaModelo>(rm, HttpStatus.OK);
-                }
-            }
+        if(sr.findByUsuarioSeguidoIdAndUsuarioSeguindoId(usuarioSeguidoId, usuarioSeguindoId).isPresent()){
+            rm.setMensagem("Você já segue essa pessoa!");
+            return new ResponseEntity<respostaModelo>(rm, HttpStatus.BAD_REQUEST);
         }
 
         if(usuarioSeguido.isPresent() && usuarioSeguindo.isPresent()){
@@ -210,17 +206,20 @@ public class usuarioServiço {
 
             int seguindo = usuarioSeguindo.get().getSeguindo();
             usuarioSeguindo.get().setSeguindo(seguindo+1);
-            
+
             seguidorModelo seguidor = new seguidorModelo();
             seguidor.setUsuarioSeguidoId(usuarioSeguidoId);
             seguidor.setUsuarioSeguindoId(usuarioSeguindoId);
             sr.save(seguidor);
 
+            ur.save(usuarioSeguido.get());
+            ur.save(usuarioSeguindo.get());
+
             rm.setMensagem("Seguido!");
             return new ResponseEntity<respostaModelo>(rm, HttpStatus.OK);
         }
         rm.setMensagem("Esse usuário não existe...");
-        return new ResponseEntity<respostaModelo>(rm, HttpStatus.OK);
+        return new ResponseEntity<respostaModelo>(rm, HttpStatus.BAD_REQUEST);
      }
 
 
@@ -229,29 +228,25 @@ public class usuarioServiço {
           public ResponseEntity<?> pararDeSeguir(Long usuarioSeguidoId, Long usuarioSeguindoId){
             Optional<usuarioModelo> usuarioSeguido = ur.findById(usuarioSeguidoId);
             Optional<usuarioModelo> usuarioSeguindo = ur.findById(usuarioSeguindoId);
+            Optional<seguidorModelo> vinculo = sr.findByUsuarioSeguidoIdAndUsuarioSeguindoId(usuarioSeguidoId, usuarioSeguindoId);
 
-            for(Long i = (long)0; i <= sr.count(); i ++){
-                if(sr.findById(i).isPresent()){
-                    if(sr.findById(i).get().getUsuarioSeguidoId() == usuarioSeguidoId && sr.findById(i).get().getUsuarioSeguindoId() == usuarioSeguindoId){
+            if(vinculo.isPresent() && usuarioSeguido.isPresent() && usuarioSeguindo.isPresent()){
+                sr.delete(vinculo.get());
 
-                        sr.deleteById(i);
-                    
-                        int seguidores = usuarioSeguido.get().getSeguidores();
-                        usuarioSeguido.get().setSeguidores(seguidores-1);
-        
-                        int seguindo = usuarioSeguindo.get().getSeguindo();
-                        usuarioSeguindo.get().setSeguindo(seguindo-1);
+                int seguidores = usuarioSeguido.get().getSeguidores();
+                usuarioSeguido.get().setSeguidores(seguidores-1);
 
-                        ur.save(usuarioSeguido.get());
-                        ur.save(usuarioSeguindo.get());
+                int seguindo = usuarioSeguindo.get().getSeguindo();
+                usuarioSeguindo.get().setSeguindo(seguindo-1);
 
-                        rm.setMensagem("Parado de seguir!");
-                        return new ResponseEntity<respostaModelo>(rm, HttpStatus.OK);
-                    }
-                }
+                ur.save(usuarioSeguido.get());
+                ur.save(usuarioSeguindo.get());
+
+                rm.setMensagem("Parado de seguir!");
+                return new ResponseEntity<respostaModelo>(rm, HttpStatus.OK);
             }
             rm.setMensagem("Você não segue esse usuário");
-            return new ResponseEntity<respostaModelo>(rm, HttpStatus.OK);
+            return new ResponseEntity<respostaModelo>(rm, HttpStatus.BAD_REQUEST);
          }
 
     //salvar foto de perfil
