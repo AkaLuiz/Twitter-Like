@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import {Link} from 'react-router-dom'
 
-function PostComp({vetorR, vetorP, vetorU, vetorC, remover, repostar, desrepostar, curtir, descurtir, idUsuarioLogado, nomeUsuarioLogado}) {
+function PostComp({vetorR, vetorP, vetorU, vetorC, vetorComentarios, remover, repostar, desrepostar, curtir, descurtir, idUsuarioLogado, nomeUsuarioLogado}) {
 
-    const vetorInvertido = [...vetorP].reverse();
+    //comentários são postagens por baixo dos panos, mas não devem aparecer soltos no feed
+    const idsComentarios = new Set(vetorComentarios.map(c => c.comentarioId));
+    const vetorInvertido = [...vetorP].filter(p => !idsComentarios.has(p.postagemId)).reverse();
     const [idPostagem, setIdPostagem] = useState();
     
     const [objCurtida, setObjCurtida] = useState({

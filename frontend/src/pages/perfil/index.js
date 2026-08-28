@@ -2,7 +2,7 @@ import {useState, useEffect} from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { obterUsuarioLogado } from '../../utils/auth';
 import { API_URL } from '../../utils/api';
-function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar, desrepostar, vetorS, vetorP, vetorR, vetorU, vetorC}){
+function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar, desrepostar, vetorS, vetorP, vetorR, vetorU, vetorC, vetorComentarios}){
 
     const { id: idParam } = useParams();
     const id = Number(idParam);
@@ -10,7 +10,9 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
     const usuarioAutenticado = obterUsuarioLogado();
     const usuarioLogado = usuarioAutenticado?.usuarioId;
     const [usuario, setUsuario] = useState({});
-    const vetorInvertido = [...vetorP].reverse();
+    //comentários são postagens por baixo dos panos, mas não devem aparecer soltos no perfil
+    const idsComentarios = new Set(vetorComentarios.map(c => c.comentarioId));
+    const vetorInvertido = [...vetorP].filter(p => !idsComentarios.has(p.postagemId)).reverse();
 
       useEffect(() => {
         if (!usuarioAutenticado) {

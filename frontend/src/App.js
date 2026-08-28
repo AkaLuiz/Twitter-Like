@@ -459,10 +459,10 @@ function App() {
         <ToastContainer theme="dark" position="top-right" autoClose={3500}/>
         <Routes>
           <Route path='/' element={<Navigate to={destinoPadrao} replace/>}/>
-          <Route path='/inicio' element={<Inicio postar={postarPost} remover={removerPost} repostar={repostarPost} desrepostar={desrepostarPost} vetorR={reposts} vetorP={postagens} vetorU={usuarios} vetorC={curtidas} curtir={curtirPost} descurtir={descurtirPost}/>}/>
+          <Route path='/inicio' element={<Inicio postar={postarPost} remover={removerPost} repostar={repostarPost} desrepostar={desrepostarPost} vetorR={reposts} vetorP={postagens} vetorU={usuarios} vetorC={curtidas} vetorComentarios={comentariosLista} curtir={curtirPost} descurtir={descurtirPost}/>}/>
           <Route path='/cadastro' element={<Cadastro cadastrar={cadastrarUsuario} eventoTeclado={aoDigitarUsu}/>}/>
           <Route path='/login' element={<Login logar={entrar}/>}/>
-          <Route path='/perfil/:id' element={<Perfil seguir={seguirUsuario} desseguir={desseguirUsuario} postar={postarPost} remover={removerPost} curtir={curtirPost} descurtir={descurtirPost} repostar={repostarPost} desrepostar={desrepostarPost} vetorS={seguidores} vetorP={postagens} vetorR={reposts} vetorU={usuarios} vetorC={curtidas}/>}/>
+          <Route path='/perfil/:id' element={<Perfil seguir={seguirUsuario} desseguir={desseguirUsuario} postar={postarPost} remover={removerPost} curtir={curtirPost} descurtir={descurtirPost} repostar={repostarPost} desrepostar={desrepostarPost} vetorS={seguidores} vetorP={postagens} vetorR={reposts} vetorU={usuarios} vetorC={curtidas} vetorComentarios={comentariosLista}/>}/>
           <Route path='/postagem/:id' element={<Postagem vetorP={postagens} vetorU={usuarios} vetorC={curtidas} vetorR={reposts} vetorComentarios={comentariosLista} comentar={comentar} curtir={curtirPost} descurtir={descurtirPost} repostar={repostarPost} desrepostar={desrepostarPost} remover={removerPost}/>}/>
           <Route path='*' element={<Navigate to={destinoPadrao} replace/>}/>
         </Routes>

@@ -6,7 +6,7 @@ import { obterUsuarioLogado, limparUsuarioLogado } from '../../utils/auth';
 
 const LIMITE_CARACTERES_POST = 280;
 
-function Inicio({postar, remover, repostar, desrepostar, vetorR, vetorP, vetorU, vetorC, curtir, descurtir, botaoCurtida, selecionar}) {
+function Inicio({postar, remover, repostar, desrepostar, vetorR, vetorP, vetorU, vetorC, vetorComentarios, curtir, descurtir, botaoCurtida, selecionar}) {
 
     const navigate = useNavigate();
     const usuarioLogado = obterUsuarioLogado();
@@ -89,7 +89,7 @@ function Inicio({postar, remover, repostar, desrepostar, vetorR, vetorP, vetorU,
                         <button className="botao-primario" onClick={handlePostar}>Postar</button>
                     </div>
                 </div>
-                <PostComp vetorR={vetorR} vetorP={vetorP} vetorU={vetorU} vetorC={vetorC} remover={remover}
+                <PostComp vetorR={vetorR} vetorP={vetorP} vetorU={vetorU} vetorC={vetorC} vetorComentarios={vetorComentarios} remover={remover}
                 repostar={repostar} desrepostar={desrepostar} curtir={curtir} descurtir={descurtir}
                 idUsuarioLogado={id} nomeUsuarioLogado={nomeUsuario} botaoCurtida={botaoCurtida} selecionar={selecionar}/>
             </main>
