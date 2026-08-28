@@ -46,6 +46,9 @@ public class postagemServico {
         if(acao.equals("cadastrar")){
             //quem posta é sempre o dono do token, não o que vier no corpo da requisição
             pm.setUsuarioPostagemId(AutenticacaoUtil.obterUsuarioAutenticado());
+            //se o cliente mandar um postagemId de uma postagem já existente, o save() vira um
+            //UPDATE em cima dela em vez de criar uma nova - zera pra garantir que é sempre um INSERT
+            pm.setPostagemId(null);
         }
         else{
             Optional<postagemModelo> existente = pr.findById(pm.getPostagemId());
@@ -90,6 +93,8 @@ public class postagemServico {
     public ResponseEntity<?> comentar(postagemModelo pm, Long postagemId){
         //quem comenta é sempre o dono do token
         pm.setUsuarioPostagemId(AutenticacaoUtil.obterUsuarioAutenticado());
+        //mesma proteção do postarEditar: nunca deixar o corpo mandar um postagemId existente
+        pm.setPostagemId(null);
 
         if(pm.getTexto().equals("")){
             rm.setMensagem("Não pode ser enviada uma mensagem vazia!");
@@ -108,16 +113,24 @@ public class postagemServico {
             return new ResponseEntity<respostaModelo>(rm, HttpStatus.BAD_REQUEST);
         }
         else{
-            if(pr.findById(postagemId).isPresent()){
+            Optional<postagemModelo> postagemPai = pr.findById(postagemId);
+            if(postagemPai.isPresent()){
+                //salva o comentário primeiro pra ter o id gerado antes de montar o vínculo
+                postagemModelo comentarioSalvo = pr.save(pm);
+
                 comentarioModelo comentario = new comentarioModelo();
-                comentario.setComentarioId(pm.getPostagemId());
-                comentario.setPostagemId(pr.findById(postagemId).get().getPostagemId());
-                comentario.setUsuarioId(pm.getUsuarioPostagemId());
+                comentario.setComentarioId(comentarioSalvo.getPostagemId());
+                comentario.setPostagemId(postagemPai.get().getPostagemId());
+                comentario.setUsuarioId(comentarioSalvo.getUsuarioPostagemId());
                 cr.save(comentario);
-                return new ResponseEntity<postagemModelo>(pr.save(pm), HttpStatus.CREATED);
-            }  
+
+                postagemPai.get().setComentarios(postagemPai.get().getComentarios() + 1);
+                pr.save(postagemPai.get());
+
+                return new ResponseEntity<postagemModelo>(comentarioSalvo, HttpStatus.CREATED);
+            }
             rm.setMensagem("Essa postagem não existe!");
-            return new ResponseEntity<respostaModelo>(rm, HttpStatus.BAD_REQUEST); 
+            return new ResponseEntity<respostaModelo>(rm, HttpStatus.BAD_REQUEST);
         }
     }
     

@@ -7,6 +7,7 @@ import Inicio from './pages/inicio/index';
 import Cadastro from './pages/cadastro/index';
 import Login from './pages/login/index';
 import Perfil from './pages/perfil/index';
+import Postagem from './pages/postagem/index';
 import { obterToken, obterUsuarioLogado } from './utils/auth';
 import { API_URL } from './utils/api';
 
@@ -60,6 +61,7 @@ function App() {
   const [seguidores, setSeguidores] = useState([])
   const [curtidas, setCurtidas] = useState([])
   const [reposts, setReposts] = useState([])
+  const [comentariosLista, setComentariosLista] = useState([])
   const [objPostagem, setObjPostagem] = useState(postagem)
   const [objUsuario, setObjUsuario] = useState(usuario)
   const [objSeguidor, setObjSeguidor] = useState(seguidor)
@@ -100,6 +102,13 @@ function App() {
       .then(retorno_convertido => setReposts(retorno_convertido))
   }
 
+  //busca os vínculos de comentários (qual postagem comenta qual) atual no backend
+  const buscarComentarios = () => {
+    return fetch(API_URL + '/liste/comentarios')
+      .then(retorno => retorno.json())
+      .then(retorno_convertido => setComentariosLista(retorno_convertido))
+  }
+
   //carrega tudo quando o app abre
   useEffect(() => {
     buscarPostagens()
@@ -107,6 +116,7 @@ function App() {
     buscarSeguidores()
     buscarCurtidas()
     buscarReposts()
+    buscarComentarios()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -183,21 +193,25 @@ function App() {
       })
     }
 
-  const comentar = () => {
-    fetch(API_URL + '/comente/' + objPostagem.postagemId, {
+  //idPostagemPai só entra na URL - nunca no corpo, pra não arriscar o Hibernate
+  //interpretar o comentário como uma atualização da postagem original
+  const comentar = (idPostagemPai, objComentario) => {
+    return fetch(API_URL + '/comente/' + idPostagemPai, {
       method: 'post',
-      body: JSON.stringify(objPostagem),
+      body: JSON.stringify(objComentario),
       headers: cabecalhosAutenticados()
     })
       .then(retorno => retorno.json())
       .then(retorno_convertido => {
         if(retorno_convertido.mensagem !== undefined){
           toast.error(retorno_convertido.mensagem)
+          return false;
         }
         else{
           buscarPostagens()
+          buscarComentarios()
           toast.success("Comentário enviado!")
-          limparFormularioPostagem()
+          return true;
         }
       })
   }
@@ -449,6 +463,7 @@ function App() {
           <Route path='/cadastro' element={<Cadastro cadastrar={cadastrarUsuario} eventoTeclado={aoDigitarUsu}/>}/>
           <Route path='/login' element={<Login logar={entrar}/>}/>
           <Route path='/perfil/:id' element={<Perfil seguir={seguirUsuario} desseguir={desseguirUsuario} postar={postarPost} remover={removerPost} curtir={curtirPost} descurtir={descurtirPost} repostar={repostarPost} desrepostar={desrepostarPost} vetorS={seguidores} vetorP={postagens} vetorR={reposts} vetorU={usuarios} vetorC={curtidas}/>}/>
+          <Route path='/postagem/:id' element={<Postagem vetorP={postagens} vetorU={usuarios} vetorC={curtidas} vetorR={reposts} vetorComentarios={comentariosLista} comentar={comentar} curtir={curtirPost} descurtir={descurtirPost} repostar={repostarPost} desrepostar={desrepostarPost} remover={removerPost}/>}/>
           <Route path='*' element={<Navigate to={destinoPadrao} replace/>}/>
         </Routes>
     </Router>

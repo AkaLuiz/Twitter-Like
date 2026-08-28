@@ -137,7 +137,7 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                                         </button>
                                     }
 
-                                    <span className="post-comentarios">{obj.comentarios} comentários</span>
+                                    <Link className="post-acao" to={`/postagem/${obj.postagemId}`}>{obj.comentarios} comentários</Link>
                                     </div>
                                     </div>
                                     :
@@ -218,7 +218,7 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                                         </button>
                                     }
 
-                                    <span className="post-comentarios">{obj.comentarios} comentários</span>
+                                    <Link className="post-acao" to={`/postagem/${obj.postagemId}`}>{obj.comentarios} comentários</Link>
                                     </div>
                                     </div>
                                     :

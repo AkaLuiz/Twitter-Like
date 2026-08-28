@@ -117,7 +117,7 @@ function PostComp({vetorR, vetorP, vetorU, vetorC, remover, repostar, desreposta
                                     Repostar · {obj.reposts}
                                 </button>
                             }
-                            <span className="post-comentarios">{obj.comentarios} comentários</span>
+                            <Link className="post-acao" to={`/postagem/${obj.postagemId}`}>{obj.comentarios} comentários</Link>
                         </div>
                         </div>
                     )
