@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {Link} from 'react-router-dom'
+import Avatar from '../avatar';
 
 function PostComp({vetorR, vetorP, vetorU, vetorC, vetorComentarios, remover, repostar, desrepostar, curtir, descurtir, idUsuarioLogado, nomeUsuarioLogado}) {
 
@@ -83,6 +84,8 @@ function PostComp({vetorR, vetorP, vetorU, vetorC, vetorComentarios, remover, re
                 const nomeUsuarioRepost = nomeUsuarioRepostado ? nomeUsuarioRepostado.nome : 'Usuário desconhecido';
                 // Retorna o nome do usuário que postou o post
                 const UsuarioNome = repostagem ? nomeUsuarioRepost : nomeUsuario;
+                // Retorna o objeto do usuário que postou o post (pra pegar a foto de perfil)
+                const usuarioExibido = repostagem ? nomeUsuarioRepostado : usuario;
             
                 
 
@@ -90,7 +93,7 @@ function PostComp({vetorR, vetorP, vetorU, vetorC, vetorComentarios, remover, re
                         <div className="post-card" key={indice}>
                         <p className="post-repost-de">{donoRepost}</p>
                         <div className="post-cabecalho">
-                            <span className="avatar"></span>
+                            <Avatar usuario={usuarioExibido}/>
                             <Link className="post-handle" to={`/perfil/${idUsuario}`}
                             state={{nomeUsuario:UsuarioNome, id:idUsuario, usuarioLogado: idUsuarioLogado}}
                             >@{UsuarioNome}

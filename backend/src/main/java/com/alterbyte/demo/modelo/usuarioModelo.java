@@ -33,4 +33,7 @@ public class usuarioModelo {
 	@Column(name = "seguindo")
 	private int seguindo;
 
+	@Column(name = "foto_perfil")
+	private String fotoPerfil;
+
 }

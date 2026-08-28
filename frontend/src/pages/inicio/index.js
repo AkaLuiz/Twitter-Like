@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import PostComp from '../../components/postagemComp';
 import Logo from '../../components/logo';
+import Avatar from '../../components/avatar';
 import { useEffect, useState } from 'react';
 import { obterUsuarioLogado, limparUsuarioLogado } from '../../utils/auth';
 
@@ -12,6 +13,8 @@ function Inicio({postar, remover, repostar, desrepostar, vetorR, vetorP, vetorU,
     const usuarioLogado = obterUsuarioLogado();
     const nomeUsuario = usuarioLogado?.nome;
     const id = usuarioLogado?.usuarioId;
+    //busca o usuário atualizado na lista (a foto de perfil pode ter mudado desde o login)
+    const usuarioAtual = vetorU.find(u => u.usuarioId === id) || usuarioLogado;
     const [texto, setTexto] = useState('');
     const [objPostagem, setObjPostagem] = useState({
         usuarioPostagemId: id,
@@ -55,7 +58,7 @@ function Inicio({postar, remover, repostar, desrepostar, vetorR, vetorP, vetorU,
             <aside className="barra-lateral">
                 <Logo tamanho={26}/>
                 <div className="usuario-chip">
-                    <span className="avatar"></span>
+                    <Avatar usuario={usuarioAtual}/>
                     <span>@{nomeUsuario || 'usuário'}</span>
                 </div>
                 <nav className="nav-lista">

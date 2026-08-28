@@ -1,15 +1,17 @@
-import {useState, useEffect} from 'react';
+import { useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { obterUsuarioLogado } from '../../utils/auth';
-import { API_URL } from '../../utils/api';
-function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar, desrepostar, vetorS, vetorP, vetorR, vetorU, vetorC, vetorComentarios}){
+import Avatar from '../../components/avatar';
+function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar, desrepostar, enviarFoto, vetorS, vetorP, vetorR, vetorU, vetorC, vetorComentarios}){
 
     const { id: idParam } = useParams();
     const id = Number(idParam);
     const navigate = useNavigate();
     const usuarioAutenticado = obterUsuarioLogado();
     const usuarioLogado = usuarioAutenticado?.usuarioId;
-    const [usuario, setUsuario] = useState({});
+    //pega sempre da lista global (já atualizada pelo App.js) em vez de manter um fetch próprio
+    //que ficava desatualizado, por exemplo depois de trocar a foto de perfil
+    const usuario = vetorU.find(u => u.usuarioId === id) || {};
     //comentários são postagens por baixo dos panos, mas não devem aparecer soltos no perfil
     const idsComentarios = new Set(vetorComentarios.map(c => c.comentarioId));
     const vetorInvertido = [...vetorP].filter(p => !idsComentarios.has(p.postagemId)).reverse();
@@ -17,13 +19,9 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
       useEffect(() => {
         if (!usuarioAutenticado) {
             navigate('/login');
-            return;
         }
-        fetch(API_URL + '/liste/usuarios/' + id)
-          .then(retorno => retorno.json())
-          .then(retorno_convertido => setUsuario(retorno_convertido));
         // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, [id]);
+      }, []);
 
 
       const seguidores = vetorS.find(follow => follow.usuarioSeguidoId === id && follow.usuarioSeguindoId === usuarioLogado);
@@ -59,6 +57,14 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
         }
     }
 
+    const handleTrocarFoto = (e) => {
+        const arquivo = e.target.files[0];
+        if (arquivo) {
+            enviarFoto(usuarioLogado, arquivo);
+        }
+        e.target.value = '';
+    }
+
     return(
         <div className="tela-perfil">
             <Link className="link-sutil" to="/inicio">← início</Link>
@@ -67,7 +73,20 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                 ?
                 <div>
                     <div className="cabecalho-perfil">
-                        <h2>{usuario.nome || "Carregando..." }</h2>
+                        <div className="cabecalho-perfil-topo">
+                            <Avatar usuario={usuario} tamanho={72}/>
+                            <div>
+                                <h2>{usuario.nome || "Carregando..." }</h2>
+                                <label htmlFor="input-foto-perfil" className="link-sutil">Trocar foto</label>
+                                <input
+                                    id="input-foto-perfil"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleTrocarFoto}
+                                    style={{ display: 'none' }}
+                                />
+                            </div>
+                        </div>
                         <div className="estatisticas-perfil">
                             <span>{usuario.seguidores ?? 0} seguidores</span>
                             <span>{usuario.seguindo ?? 0} seguindo</span>
@@ -107,7 +126,7 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                                     <div className="post-card">
                                     <p className="post-repost-de">{donoRepost}</p>
                                     <div className="post-cabecalho">
-                                        <span className="avatar"></span>
+                                        <Avatar usuario={usuario}/>
                                         <Link className="post-handle" to={`/perfil/${id}`}
                                         >@{usuario.nome}
                                         </Link>
@@ -156,7 +175,10 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                 :
                 <div>
                     <div className="cabecalho-perfil">
-                        <h2>{usuario.nome || "Carregando..." }</h2>
+                        <div className="cabecalho-perfil-topo">
+                            <Avatar usuario={usuario} tamanho={72}/>
+                            <h2>{usuario.nome || "Carregando..." }</h2>
+                        </div>
                         <div className="estatisticas-perfil">
                             <span>{usuario.seguidores ?? 0} seguidores</span>
                             <span>{usuario.seguindo ?? 0} seguindo</span>
@@ -197,7 +219,7 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                                     <div className="post-card">
                                     <p className="post-repost-de">{donoRepost}</p>
                                     <div className="post-cabecalho">
-                                        <span className="avatar"></span>
+                                        <Avatar usuario={usuario}/>
                                         <Link className="post-handle" to={`/perfil/${id}`}
                                         >@{usuario.nome}
                                         </Link>

@@ -150,6 +150,7 @@
   background: #eceaf0;
   flex-shrink: 0;
   display: inline-block;
+  object-fit: cover;
 }
 
 .nav-lista {
@@ -340,6 +341,16 @@
   font-size: 18px;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+.cabecalho-perfil-topo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cabecalho-perfil-topo .link-sutil {
+  cursor: pointer;
 }
 
 .estatisticas-perfil {

@@ -23,6 +23,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:-chave-de-desenvolvimento-trocar-em-producao-0123456789abcdef}
     ports:
       - "8090:8090"
+    volumes:
+      - uploads_data:/app/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -40,3 +42,4 @@ services:
 
 volumes:
   db_data:
+  uploads_data:

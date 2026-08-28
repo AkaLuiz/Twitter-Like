@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { obterUsuarioLogado } from '../../utils/auth';
+import Avatar from '../../components/avatar';
 
 const LIMITE_CARACTERES_COMENTARIO = 280;
 
@@ -78,7 +79,7 @@ function Postagem({ vetorP, vetorU, vetorC, vetorR, vetorComentarios, comentar, 
 
             <div className="post-card">
                 <div className="post-cabecalho">
-                    <span className="avatar"></span>
+                    <Avatar usuario={autor}/>
                     <Link className="post-handle" to={`/perfil/${postagem.usuarioPostagemId}`}>@{nomeAutor}</Link>
                 </div>
                 <p className="post-texto">{postagem.texto}</p>
@@ -125,7 +126,7 @@ function Postagem({ vetorP, vetorU, vetorC, vetorR, vetorComentarios, comentar, 
                     return (
                         <div className="post-card" key={c.postagemId}>
                             <div className="post-cabecalho">
-                                <span className="avatar"></span>
+                                <Avatar usuario={autorComentario}/>
                                 <Link className="post-handle" to={`/perfil/${c.usuarioPostagemId}`}>@{nomeAutorComentario}</Link>
                             </div>
                             <p className="post-texto">{c.texto}</p>

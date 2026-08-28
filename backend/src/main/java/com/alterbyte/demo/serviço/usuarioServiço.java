@@ -1,14 +1,22 @@
 package com.alterbyte.demo.serviço;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 import java.util.ArrayList;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.alterbyte.demo.config.AutenticacaoUtil;
@@ -38,6 +46,9 @@ public class usuarioServiço {
 
     @Autowired
     private tokenServico ts;
+
+    @Value("${app.upload.dir}")
+    private String pastaUpload;
 
     //listar usuários
     public Iterable<usuarioModelo> listarUsuarios(){
@@ -242,5 +253,60 @@ public class usuarioServiço {
             rm.setMensagem("Você não segue esse usuário");
             return new ResponseEntity<respostaModelo>(rm, HttpStatus.OK);
          }
-    
+
+    //salvar foto de perfil
+    public ResponseEntity<?> salvarFotoPerfil(Long usuarioId, MultipartFile arquivo){
+        //só é possível trocar a própria foto
+        if(!AutenticacaoUtil.obterUsuarioAutenticado().equals(usuarioId)){
+            rm.setMensagem("Você só pode trocar a foto da sua própria conta!");
+            return new ResponseEntity<respostaModelo>(rm, HttpStatus.FORBIDDEN);
+        }
+
+        Optional<usuarioModelo> usuario = ur.findById(usuarioId);
+        if(usuario.isEmpty()){
+            rm.setMensagem("Esse usuário não existe!");
+            return new ResponseEntity<respostaModelo>(rm, HttpStatus.BAD_REQUEST);
+        }
+
+        if(arquivo.isEmpty()){
+            rm.setMensagem("Envie um arquivo de imagem!");
+            return new ResponseEntity<respostaModelo>(rm, HttpStatus.BAD_REQUEST);
+        }
+
+        String tipo = arquivo.getContentType();
+        if(tipo == null || !tipo.startsWith("image/")){
+            rm.setMensagem("O arquivo precisa ser uma imagem!");
+            return new ResponseEntity<respostaModelo>(rm, HttpStatus.BAD_REQUEST);
+        }
+
+        try{
+            Path pasta = Paths.get(pastaUpload);
+            Files.createDirectories(pasta);
+
+            String extensao = "";
+            String nomeOriginal = arquivo.getOriginalFilename();
+            if(nomeOriginal != null && nomeOriginal.contains(".")){
+                extensao = nomeOriginal.substring(nomeOriginal.lastIndexOf("."));
+            }
+            String nomeArquivo = UUID.randomUUID().toString() + extensao;
+
+            Files.copy(arquivo.getInputStream(), pasta.resolve(nomeArquivo), StandardCopyOption.REPLACE_EXISTING);
+
+            //apaga a foto antiga, se tinha uma, pra não acumular lixo em disco
+            String fotoAntiga = usuario.get().getFotoPerfil();
+            if(fotoAntiga != null){
+                Files.deleteIfExists(pasta.resolve(fotoAntiga));
+            }
+
+            usuario.get().setFotoPerfil(nomeArquivo);
+            usuarioModelo salvo = ur.save(usuario.get());
+            salvo.setSenha(null);
+
+            return new ResponseEntity<usuarioModelo>(salvo, HttpStatus.OK);
+        } catch(IOException e){
+            rm.setMensagem("Erro ao salvar a imagem!");
+            return new ResponseEntity<respostaModelo>(rm, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

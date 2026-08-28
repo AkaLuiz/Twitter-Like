@@ -390,6 +390,32 @@ function App() {
       })
     }
 
+  //enviar foto de perfil
+  const enviarFotoPerfil = (usuarioId, arquivo) => {
+    const dadosArquivo = new FormData();
+    dadosArquivo.append('arquivo', arquivo);
+
+    //não usa cabecalhosAutenticados() aqui - Content-type tem que ser definido
+    //automaticamente pelo navegador pra incluir o boundary do multipart
+    return fetch(API_URL + '/usuarios/' + usuarioId + '/foto', {
+      method: 'post',
+      body: dadosArquivo,
+      headers: {
+        'Authorization': 'Bearer ' + obterToken()
+      }
+    })
+      .then(async retorno => ({ ok: retorno.ok, dados: await retorno.json() }))
+      .then(({ ok, dados }) => {
+        if (!ok) {
+          toast.error(dados.mensagem || 'Erro ao enviar a foto.')
+          return false;
+        }
+        buscarUsuarios()
+        toast.success('Foto de perfil atualizada!')
+        return true;
+      })
+  }
+
   //seguir usuario
   const seguirUsuario = (seguidoId, seguindoId) => {
     fetch(API_URL + '/segue/usuarios/' + seguidoId + '/usuarios/' + seguindoId, {
@@ -462,7 +488,7 @@ function App() {
           <Route path='/inicio' element={<Inicio postar={postarPost} remover={removerPost} repostar={repostarPost} desrepostar={desrepostarPost} vetorR={reposts} vetorP={postagens} vetorU={usuarios} vetorC={curtidas} vetorComentarios={comentariosLista} curtir={curtirPost} descurtir={descurtirPost}/>}/>
           <Route path='/cadastro' element={<Cadastro cadastrar={cadastrarUsuario} eventoTeclado={aoDigitarUsu}/>}/>
           <Route path='/login' element={<Login logar={entrar}/>}/>
-          <Route path='/perfil/:id' element={<Perfil seguir={seguirUsuario} desseguir={desseguirUsuario} postar={postarPost} remover={removerPost} curtir={curtirPost} descurtir={descurtirPost} repostar={repostarPost} desrepostar={desrepostarPost} vetorS={seguidores} vetorP={postagens} vetorR={reposts} vetorU={usuarios} vetorC={curtidas} vetorComentarios={comentariosLista}/>}/>
+          <Route path='/perfil/:id' element={<Perfil seguir={seguirUsuario} desseguir={desseguirUsuario} postar={postarPost} remover={removerPost} curtir={curtirPost} descurtir={descurtirPost} repostar={repostarPost} desrepostar={desrepostarPost} enviarFoto={enviarFotoPerfil} vetorS={seguidores} vetorP={postagens} vetorR={reposts} vetorU={usuarios} vetorC={curtidas} vetorComentarios={comentariosLista}/>}/>
           <Route path='/postagem/:id' element={<Postagem vetorP={postagens} vetorU={usuarios} vetorC={curtidas} vetorR={reposts} vetorComentarios={comentariosLista} comentar={comentar} curtir={curtirPost} descurtir={descurtirPost} repostar={repostarPost} desrepostar={desrepostarPost} remover={removerPost}/>}/>
           <Route path='*' element={<Navigate to={destinoPadrao} replace/>}/>
         </Routes>
