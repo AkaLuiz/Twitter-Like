@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.alterbyte.demo.config.AutenticacaoUtil;
 import com.alterbyte.demo.modelo.seguidorModelo;
 import com.alterbyte.demo.modelo.usuarioModelo;
 import com.alterbyte.demo.serviço.usuarioServiço;
@@ -75,12 +76,13 @@ public class usuarioControle {
 
     @PostMapping("/segue/usuarios/{usuarioSeguidoId}/usuarios/{usuarioSeguindoId}")
     public ResponseEntity<?> seguir(@PathVariable Long usuarioSeguidoId, @PathVariable Long usuarioSeguindoId) {
-        return us.seguir(usuarioSeguidoId, usuarioSeguindoId);
+        //quem está seguindo é sempre o dono do token, não o que vier na URL
+        return us.seguir(usuarioSeguidoId, AutenticacaoUtil.obterUsuarioAutenticado());
     }
 
     @DeleteMapping("/dessegue/usuarios/{usuarioSeguidoId}/usuarios/{usuarioSeguindoId}")
     public ResponseEntity<?> pararDeSeguir(@PathVariable Long usuarioSeguidoId, @PathVariable Long usuarioSeguindoId) {
-        return us.pararDeSeguir(usuarioSeguidoId, usuarioSeguindoId);
+        return us.pararDeSeguir(usuarioSeguidoId, AutenticacaoUtil.obterUsuarioAutenticado());
     }
     
 }

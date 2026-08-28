@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import com.alterbyte.demo.config.AutenticacaoUtil;
 import com.alterbyte.demo.modelo.postagemModelo;
 import com.alterbyte.demo.modelo.repostModelo;
 import com.alterbyte.demo.modelo.respostaModelo;
@@ -61,6 +62,16 @@ public class repostServico {
     }
     
     public ResponseEntity<?> desrepostar(Long postagemId, Long repostId){
+        Optional<repostModelo> repost = rr.findById(repostId);
+        if(repost.isEmpty()){
+            rem.setMensagem("Repost não encontrado");
+            return new ResponseEntity<respostaModelo>(rem, HttpStatus.NOT_FOUND);
+        }
+        if(!repost.get().getUsuarioId().equals(AutenticacaoUtil.obterUsuarioAutenticado())){
+            rem.setMensagem("Você só pode remover seus próprios reposts!");
+            return new ResponseEntity<respostaModelo>(rem, HttpStatus.FORBIDDEN);
+        }
+
         Optional<postagemModelo> postagem = pr.findById(postagemId);
         if(postagem.isPresent()){
             int reposts = postagem.get().getReposts()-1;

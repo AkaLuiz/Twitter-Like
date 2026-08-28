@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.alterbyte.demo.config.AutenticacaoUtil;
+import com.alterbyte.demo.modelo.loginRespostaModelo;
 import com.alterbyte.demo.modelo.respostaModelo;
 import com.alterbyte.demo.modelo.seguidorModelo;
 import com.alterbyte.demo.modelo.usuarioModelo;
@@ -33,6 +35,9 @@ public class usuarioServiço {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private tokenServico ts;
 
     //listar usuários
     public Iterable<usuarioModelo> listarUsuarios(){
@@ -89,6 +94,11 @@ public class usuarioServiço {
     //cadastrar ou alterar conta de usuários
     public ResponseEntity<?> cadastrarAlterar(usuarioModelo pm, String acao){
 
+        //só é possível alterar a própria conta, nunca a de outro usuário
+        if(acao.equals("alterar")){
+            pm.setUsuarioId(AutenticacaoUtil.obterUsuarioAutenticado());
+        }
+
         for(Long i = (long)0; i <= ur.count(); i++){
             if(ur.findById(i).isPresent()){
                 if(ur.findById(i).get().getNome().equals(pm.getNome()) ){
@@ -141,7 +151,12 @@ public class usuarioServiço {
         if(usuario.isPresent() && passwordEncoder.matches(senha, usuario.get().getSenha())){
             usuarioModelo encontrado = usuario.get();
             encontrado.setSenha(null);
-            return new ResponseEntity<usuarioModelo>(encontrado, HttpStatus.OK);
+
+            loginRespostaModelo resposta = new loginRespostaModelo();
+            resposta.setUsuario(encontrado);
+            resposta.setToken(ts.gerarToken(encontrado.getUsuarioId()));
+
+            return new ResponseEntity<loginRespostaModelo>(resposta, HttpStatus.OK);
         }
 
         rm.setMensagem("Nome e/ou senha incorretos!");
@@ -149,6 +164,12 @@ public class usuarioServiço {
     }
      //remover Usuarios
      public ResponseEntity<?> remover(long usuarioId){
+        //só é possível remover a própria conta
+        if(!AutenticacaoUtil.obterUsuarioAutenticado().equals(usuarioId)){
+            rm.setMensagem("Você só pode remover sua própria conta!");
+            return new ResponseEntity<respostaModelo>(rm, HttpStatus.FORBIDDEN);
+        }
+
         ur.deleteById(usuarioId);
         if(ur.findById(usuarioId).isPresent()){
             rm.setMensagem("Usuário removido com sucesso");

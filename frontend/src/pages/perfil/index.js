@@ -1,17 +1,26 @@
 import {useState, useEffect} from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { obterUsuarioLogado } from '../../utils/auth';
 function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar, desrepostar, vetorS, vetorP, vetorR, vetorU, vetorC}){
 
-    const location = useLocation();
-    const {nomeUsuario, id, usuarioLogado  } = location.state || {};
-    const [usuario, setUsuario] = useState([]);
+    const { id: idParam } = useParams();
+    const id = Number(idParam);
+    const navigate = useNavigate();
+    const usuarioAutenticado = obterUsuarioLogado();
+    const usuarioLogado = usuarioAutenticado?.usuarioId;
+    const [usuario, setUsuario] = useState({});
     const vetorInvertido = [...vetorP].reverse();
 
       useEffect(() => {
+        if (!usuarioAutenticado) {
+            navigate('/login');
+            return;
+        }
         fetch('http://localhost:8090/liste/usuarios/' + id)
           .then(retorno => retorno.json())
           .then(retorno_convertido => setUsuario(retorno_convertido));
-      }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [id]);
     
 
       const seguidores = vetorS.find(follow => follow.usuarioSeguidoId === id && follow.usuarioSeguindoId === usuarioLogado);
@@ -56,7 +65,7 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                 usuarioLogado === id
                 ?
                 <div>
-                    <p>Perfil de: {nomeUsuario || "Faça login para entrar em um perfil" }</p>
+                    <p>Perfil de: {usuario.nome || "Carregando..." }</p>
                     <p>seguidores: {usuario.seguidores}</p>
                     <p>seguindo: {usuario.seguindo}</p>
 
@@ -92,8 +101,7 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                                     <fieldset>
                                     <p>{donoRepost}</p>
                                     <Link to={`/perfil/${id}`}
-                                    state={{nomeUsuario:nomeUsuario, id:id, usuarioLogado: usuarioLogado}}
-                                    >{nomeUsuario}
+                                    >{usuario.nome}
                                     </Link>
                                     <p>{obj.texto}</p>
 
@@ -152,7 +160,7 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
 
                 :
                 <div>
-                    <p>Perfil de: {nomeUsuario || "Faça login para entrar em um perfil" }</p>
+                    <p>Perfil de: {usuario.nome || "Carregando..." }</p>
                     <p>seguidores: {usuario.seguidores}</p>
                     <p>seguindo: {usuario.seguindo}</p>
 
@@ -189,10 +197,9 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                                     postagemDono
                                     ?
                                     <fieldset>
-                                    <p>{nomeUsuario}</p>
+                                    <p>{usuario.nome}</p>
                                     <Link to={`/perfil/${id}`}
-                                    state={{nomeUsuario:nomeUsuario, id:id, usuarioLogado: usuarioLogado}}
-                                    >{nomeUsuario}
+                                    >{usuario.nome}
                                     </Link>
                                     <p>{obj.texto}</p>
     

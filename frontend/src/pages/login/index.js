@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { salvarUsuarioLogado } from '../../utils/auth';
 
-function Login({logar, encontrar}){
+function Login({logar}){
     const[nome, setNome] = useState([]);
     const[senha, setSenha] = useState([]);
     const navigate = useNavigate();
     const handleLogin = async () => {
         try{
-            const isSuccessful = await logar(nome, senha);
-            if (isSuccessful) {
-                const userId = await encontrar(nome)
-                navigate('/inicio', { state: { nomeUsuario: nome, id: userId} }); // Redireciona para a página de inicio após login bem-sucedido
+            const usuario = await logar(nome, senha);
+            if (usuario) {
+                salvarUsuarioLogado(usuario);
+                navigate('/inicio'); // Redireciona para a página de inicio após login bem-sucedido
             }
         }
         catch(error){

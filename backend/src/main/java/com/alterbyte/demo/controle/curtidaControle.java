@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.alterbyte.demo.config.AutenticacaoUtil;
 import com.alterbyte.demo.modelo.curtidaModelo;
 import com.alterbyte.demo.serviço.curtidaServico;
 
@@ -24,11 +25,12 @@ public class curtidaControle {
 
     @PutMapping("/curte/postagem/{postagemId}/usuario/{usuarioId}")
     public ResponseEntity<?> curtir(@PathVariable Long postagemId, @PathVariable Long usuarioId){
-        return cs.curtir(postagemId, usuarioId);
+        //quem curte é sempre o dono do token, não o que vier na URL
+        return cs.curtir(postagemId, AutenticacaoUtil.obterUsuarioAutenticado());
     }
 
     @PutMapping("/descurte/postagem/{postagemId}/usuario/{usuarioId}/curtida/{curtidaId}")
     public ResponseEntity<?> descurtir(@PathVariable Long postagemId, @PathVariable Long usuarioId, @PathVariable Long curtidaId){
-        return cs.descurtir(postagemId, usuarioId, curtidaId);
+        return cs.descurtir(postagemId, AutenticacaoUtil.obterUsuarioAutenticado(), curtidaId);
     }
 }

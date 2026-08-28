@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import com.alterbyte.demo.config.AutenticacaoUtil;
 import com.alterbyte.demo.modelo.repostModelo;
 import com.alterbyte.demo.serviço.repostServico;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +33,8 @@ public class repostControle {
 
     @PostMapping("/reposte/{postagemId}/usuarios/{usuarioId}")
     public ResponseEntity<?> repostar(@PathVariable Long postagemId, @PathVariable Long usuarioId) {
-        return rs.repostar(postagemId, usuarioId);
+        //quem reposta é sempre o dono do token, não o que vier na URL
+        return rs.repostar(postagemId, AutenticacaoUtil.obterUsuarioAutenticado());
     }
 
     @DeleteMapping("/desreposte/{postagemId}/repost/{repostId}")

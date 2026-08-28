@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.alterbyte.demo.config.AutenticacaoUtil;
 import com.alterbyte.demo.modelo.comentarioModelo;
 import com.alterbyte.demo.modelo.postagemModelo;
 import com.alterbyte.demo.modelo.respostaModelo;
@@ -40,6 +41,23 @@ public class postagemServico {
 
     //postar ou editar postagens
     public ResponseEntity<?> postarEditar(postagemModelo pm, String acao){
+        if(acao.equals("cadastrar")){
+            //quem posta é sempre o dono do token, não o que vier no corpo da requisição
+            pm.setUsuarioPostagemId(AutenticacaoUtil.obterUsuarioAutenticado());
+        }
+        else{
+            Optional<postagemModelo> existente = pr.findById(pm.getPostagemId());
+            if(existente.isEmpty()){
+                rm.setMensagem("Essa postagem não existe!");
+                return new ResponseEntity<respostaModelo>(rm, HttpStatus.BAD_REQUEST);
+            }
+            if(!existente.get().getUsuarioPostagemId().equals(AutenticacaoUtil.obterUsuarioAutenticado())){
+                rm.setMensagem("Você só pode editar suas próprias postagens!");
+                return new ResponseEntity<respostaModelo>(rm, HttpStatus.FORBIDDEN);
+            }
+            pm.setUsuarioPostagemId(existente.get().getUsuarioPostagemId());
+        }
+
         if(pm.getTexto().equals("")){
             rm.setMensagem("Não pode ser enviada uma mensagem vazia!");
             return new ResponseEntity<respostaModelo>(rm, HttpStatus.BAD_REQUEST);
@@ -64,6 +82,9 @@ public class postagemServico {
 
     //comentar
     public ResponseEntity<?> comentar(postagemModelo pm, Long postagemId){
+        //quem comenta é sempre o dono do token
+        pm.setUsuarioPostagemId(AutenticacaoUtil.obterUsuarioAutenticado());
+
         if(pm.getTexto().equals("")){
             rm.setMensagem("Não pode ser enviada uma mensagem vazia!");
             return new ResponseEntity<respostaModelo>(rm, HttpStatus.BAD_REQUEST);
@@ -92,6 +113,16 @@ public class postagemServico {
     
      //remover postagem
      public ResponseEntity<?> remover(long postagemId){
+        Optional<postagemModelo> existente = pr.findById(postagemId);
+        if(existente.isEmpty()){
+            rm.setMensagem("Essa postagem não existe!");
+            return new ResponseEntity<respostaModelo>(rm, HttpStatus.BAD_REQUEST);
+        }
+        if(!existente.get().getUsuarioPostagemId().equals(AutenticacaoUtil.obterUsuarioAutenticado())){
+            rm.setMensagem("Você só pode remover suas próprias postagens!");
+            return new ResponseEntity<respostaModelo>(rm, HttpStatus.FORBIDDEN);
+        }
+
         pr.deleteById(postagemId);
         rm.setMensagem("Post removido!");
         return new ResponseEntity<respostaModelo>(rm, HttpStatus.OK);

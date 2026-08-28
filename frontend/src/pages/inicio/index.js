@@ -1,17 +1,26 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import PostComp from '../../components/postagemComp';
 import { useEffect, useState } from 'react';
+import { obterUsuarioLogado, limparUsuarioLogado } from '../../utils/auth';
 
 function Inicio({postar, remover, repostar, desrepostar, vetorR, vetorP, vetorU, vetorC, curtir, descurtir, botaoCurtida, selecionar}) {
-    
-    const location = useLocation();
+
     const navigate = useNavigate();
-    const { nomeUsuario, id } = location.state || {}; // Obtém o nome do usuário do estado passado via navigate
+    const usuarioLogado = obterUsuarioLogado();
+    const nomeUsuario = usuarioLogado?.nome;
+    const id = usuarioLogado?.usuarioId;
     const [texto, setTexto] = useState([]);
     const [objPostagem, setObjPostagem] = useState({
         usuarioPostagemId: id,
         texto: texto
     });
+
+    useEffect(() => {
+        if (!usuarioLogado) {
+            navigate('/login');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         if (id) {
@@ -23,7 +32,12 @@ function Inicio({postar, remover, repostar, desrepostar, vetorR, vetorP, vetorU,
     }, [id, texto]);
 
     const handlePerfil = () =>{
-        navigate('/perfil/'+id, { state: { nomeUsuario: nomeUsuario, id: id, usuarioLogado: id} });
+        navigate('/perfil/'+id);
+    }
+
+    const handleSair = () => {
+        limparUsuarioLogado();
+        navigate('/login');
     }
 
     return (
@@ -35,6 +49,7 @@ function Inicio({postar, remover, repostar, desrepostar, vetorR, vetorP, vetorU,
                     <tr>
                         <td>
                         <input type='button' onClick={handlePerfil} value='Perfil'></input>
+                        <input type='button' onClick={handleSair} value='Sair'></input>
                         </td>
                         <td>
                         <center>

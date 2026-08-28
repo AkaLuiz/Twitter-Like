@@ -5,8 +5,16 @@ import Inicio from './pages/inicio/index';
 import Cadastro from './pages/cadastro/index';
 import Login from './pages/login/index';
 import Perfil from './pages/perfil/index';
+import { obterToken } from './utils/auth';
 
 function App() {
+  //cabeçalhos usados em toda chamada que exige login
+  const cabecalhosAutenticados = () => ({
+    'Content-type': 'application/json',
+    'Accept': 'application/json',
+    'Authorization': 'Bearer ' + obterToken()
+  });
+
   //objeto postagem
   const postagem = {
     postagemId: 0,
@@ -109,10 +117,7 @@ function App() {
     return fetch('http://localhost:8090/poste', {
       method: 'POST',
       body: JSON.stringify(objPostagem),
-      headers: {
-        'Content-type': 'application/json',
-        'Accept': 'application/json'
-      }
+      headers: cabecalhosAutenticados()
     })
       .then(retorno => retorno.json())
       .then(retorno_convertido => {
@@ -134,10 +139,7 @@ function App() {
       return fetch('http://localhost:8090/reposte/' + postagemId + '/usuarios/' + usuarioId, {
         method: 'POST',
         body: JSON.stringify(objPostagem),
-        headers: {
-          'Content-type': 'application/json',
-          'Accept': 'application/json'
-        }
+        headers: cabecalhosAutenticados()
       })
         .then(retorno => retorno.json())
         .then(retorno_convertido => {
@@ -157,10 +159,7 @@ function App() {
     const desrepostarPost = (postagemId, repostagemId) => {
       fetch('http://localhost:8090/desreposte/' + postagemId + '/repost/' + repostagemId, {
         method: 'DELETE',
-        headers: {
-          'Content-type': 'application/json',
-          'Accept': 'application/json'
-        }
+        headers: cabecalhosAutenticados()
       })
       .then(retorno => retorno.json())
       .then(retorno_convertido => {
@@ -201,10 +200,7 @@ function App() {
     fetch('http://localhost:8090/comente/' + objPostagem.postagemId, {
       method: 'post',
       body: JSON.stringify(objPostagem),
-      headers: {
-        'Content-type': 'application/json',
-        'Accept': 'application/json'
-      }
+      headers: cabecalhosAutenticados()
     })
       .then(retorno => retorno.json())
       .then(retorno_convertido => {
@@ -222,10 +218,7 @@ function App() {
   const removerPost = (postagemId) => {
     fetch('http://localhost:8090/remove/postagem/' + postagemId, {
       method: 'DELETE',
-      headers: {
-        'Content-type': 'application/json',
-        'Accept': 'application/json'
-      }
+      headers: cabecalhosAutenticados()
     })
     .then(retorno => retorno.json())
     .then(retorno_convertido => {
@@ -256,10 +249,7 @@ function App() {
     fetch('http://localhost:8090/edite/postagem', {
       method: 'put',
       body: JSON.stringify(objPostagem),
-      headers: {
-        'Content-type': 'application/json',
-        'Accept': 'application/json'
-      }
+      headers: cabecalhosAutenticados()
     })
     .then(retorno => retorno.json())
     .then(retorno_convertido => {
@@ -295,10 +285,7 @@ function App() {
       return fetch('http://localhost:8090/curte/postagem/' + postagemId + '/usuario/' + usuarioId, {
         method: 'PUT',
         body: JSON.stringify(objPostagem),
-        headers: {
-          'Content-type': 'application/json',
-          'Accept': 'application/json'
-        }
+        headers: cabecalhosAutenticados()
       })
       .then(retorno => retorno.json())
       .then(retorno_convertido => {
@@ -313,10 +300,7 @@ function App() {
       return fetch('http://localhost:8090/descurte/postagem/' + postagemId + '/usuario/' + usuarioId + '/curtida/' + curtidaId, {
         method: 'PUT',
         body: JSON.stringify(objPostagem),
-        headers: {
-          'Content-type': 'application/json',
-          'Accept': 'application/json'
-        }
+        headers: cabecalhosAutenticados()
       })
       .then(retorno => retorno.json())
       .then(retorno_convertido => {
@@ -358,53 +342,30 @@ function App() {
 
   //entrar na conta
   const entrar = (nome, senha) => {
-    return fetch('http://localhost:8090/liste/usuarios')
-    .then(retorno => retorno.json())
-    .then(retorno_convertido => {
-      setUsuarios(retorno_convertido)
-      const usuarioEncontrado = retorno_convertido.find(
-        (objUsuario) => objUsuario.nome === nome && objUsuario.senha === senha
-      )
-        if (usuarioEncontrado) {
-          alert("Login efetuado!");
-          return true;
-      } else {
-          alert("Nome e/ou senha incorretos!");
-          return false;
+    return fetch('http://localhost:8090/login', {
+      method: 'post',
+      body: JSON.stringify({ nome, senha }),
+      headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json'
       }
     })
-  }
-
-  //encontrar id
-  const encontrarId = async (nome) => {
-    try{
-      const response = await fetch('http://localhost:8090/liste/usuarios')
-      const listaUsuarios = await response.json()
-        const usuarioEncontrado = listaUsuarios.find(
-          (objUsuario) => objUsuario.nome === nome
-        )
-          if (usuarioEncontrado) {
-            return usuarioEncontrado.usuarioId;
-        } else {
-            alert("Nome e/ou senha incorretos!");
-            return false;
-        }
-      
-    }catch(error){
-      console.error(error);
-      alert("Erro ao encontrar ID do usuário.");
-      return null;
-    } 
+    .then(async retorno => ({ ok: retorno.ok, dados: await retorno.json() }))
+    .then(({ ok, dados }) => {
+      if (!ok) {
+        alert(dados.mensagem || "Nome e/ou senha incorretos!");
+        return null;
+      }
+      alert("Login efetuado!");
+      return { ...dados.usuario, token: dados.token };
+    })
   }
 
   //remover usuario
   const removerUsuario = () => {
     fetch('http://localhost:8090/remove/usuarios/' + objUsuario.usuarioId, {
       method: 'delete',
-      headers: {
-        'Content-type': 'application/json',
-        'Accept': 'application/json'
-      }
+      headers: cabecalhosAutenticados()
     })
       .then(retorno => retorno.json())
       .then(retorno_convertido => {
@@ -436,10 +397,7 @@ function App() {
       fetch('http://localhost:8090/altere/usuarios', {
         method: 'put',
         body: JSON.stringify(objUsuario),
-        headers: {
-        'Content-type': 'application/json',
-        'Accept': 'application/json'
-      }
+        headers: cabecalhosAutenticados()
       })
       .then(retorno => retorno.json())
       .then(retorno_convertido => {
@@ -474,10 +432,7 @@ function App() {
   const seguirUsuario = (seguidoId, seguindoId) => {
     fetch('http://localhost:8090/segue/usuarios/' + seguidoId + '/usuarios/' + seguindoId, {
       method: 'post',
-      headers: {
-        'Content-type': 'application/json',
-        'Accept': 'application/json'
-      }
+      headers: cabecalhosAutenticados()
     })
     .then(retorno => retorno.json())
     .then(retorno_convertido => {
@@ -497,10 +452,7 @@ function App() {
       fetch('http://localhost:8090/dessegue/usuarios/' + seguidoId + '/usuarios/' + seguindoId, {
         method: 'delete',
         body: JSON.stringify(objSeguidor),
-        headers: {
-          'Content-type': 'application/json',
-          'Accept': 'application/json'
-        }
+        headers: cabecalhosAutenticados()
       })
       .then(retorno => retorno.json())
       .then(retorno_convertido => {
@@ -550,7 +502,7 @@ function App() {
         <Routes>
           <Route path='/inicio' element={<Inicio postar={postarPost} remover={removerPost} repostar={repostarPost} desrepostar={desrepostarPost} vetorR={reposts} vetorP={postagens} vetorU={usuarios} vetorC={curtidas} curtir={curtirPost} descurtir={descurtirPost}/>}/>
           <Route path='/cadastro' element={<Cadastro cadastrar={cadastrarUsuario} eventoTeclado={aoDigitarUsu}/>}/>
-          <Route path='/login' element={<Login logar={entrar} encontrar={encontrarId}/>}/>
+          <Route path='/login' element={<Login logar={entrar}/>}/>
           <Route path='/perfil/:id' element={<Perfil seguir={seguirUsuario} desseguir={desseguirUsuario} postar={postarPost} remover={removerPost} curtir={curtirPost} descurtir={descurtirPost} repostar={repostarPost} desrepostar={desrepostarPost} vetorS={seguidores} vetorP={postagens} vetorR={reposts} vetorU={usuarios} vetorC={curtidas}/>}/>
         </Routes>
     </Router>
