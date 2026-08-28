@@ -54,60 +54,61 @@ function App() {
     postagemId: 0
   }
 
-    //obj Repost
-    const repost = {
-      id: 0,
-      botaoRepost: false,
-      usuarioId: 0,
-      postagemId: 0
-    }
-
   //UseStates
   const [postagens, setPostagens] = useState([])
   const [usuarios, setUsuarios] = useState([])
   const [seguidores, setSeguidores] = useState([])
   const [curtidas, setCurtidas] = useState([])
   const [reposts, setReposts] = useState([])
-  const [objRepost, setObjRepost] = useState(repost)
   const [objPostagem, setObjPostagem] = useState(postagem)
   const [objUsuario, setObjUsuario] = useState(usuario)
   const [objSeguidor, setObjSeguidor] = useState(seguidor)
   const [btnCadastrar, setBtnCadastrar] = useState(true)
 
-  //UseEffect Postagens
-  useEffect(() => {
-    fetch(API_URL + '/liste/postagens')
-    .then(retorno => retorno.json())
-    .then(retorno_convertido => setPostagens(retorno_convertido))
-  }, [])
-
-  //UseEffect Usuarios
-  useEffect(() => {
-    fetch(API_URL + '/liste/usuarios')
+  //busca a lista de postagens atual no backend
+  const buscarPostagens = () => {
+    return fetch(API_URL + '/liste/postagens')
       .then(retorno => retorno.json())
-      .then(retorno_convertido => setUsuarios(retorno_convertido));
-  }, []);
+      .then(retorno_convertido => setPostagens(retorno_convertido))
+  }
 
-    //UseEffect Seguidores
-    useEffect(() => {
-      fetch(API_URL + '/liste/seguidores')
-        .then(retorno => retorno.json())
-        .then(retorno_convertido => setSeguidores(retorno_convertido));
-    }, []);
+  //busca a lista de usuarios atual no backend
+  const buscarUsuarios = () => {
+    return fetch(API_URL + '/liste/usuarios')
+      .then(retorno => retorno.json())
+      .then(retorno_convertido => setUsuarios(retorno_convertido))
+  }
 
-    //UseEffect Curtidas
-    useEffect(() => {
-      fetch(API_URL + '/liste/curtidas')
-        .then(retorno => retorno.json())
-        .then(retorno_convertido => setCurtidas(retorno_convertido));
-    }, []);
+  //busca a lista de seguidores atual no backend
+  const buscarSeguidores = () => {
+    return fetch(API_URL + '/liste/seguidores')
+      .then(retorno => retorno.json())
+      .then(retorno_convertido => setSeguidores(retorno_convertido))
+  }
 
-      //UseEffect Reposts
-      useEffect(() => {
-        fetch(API_URL + '/liste/reposts')
-          .then(retorno => retorno.json())
-          .then(retorno_convertido => setReposts(retorno_convertido));
-      }, []);
+  //busca a lista de curtidas atual no backend
+  const buscarCurtidas = () => {
+    return fetch(API_URL + '/liste/curtidas')
+      .then(retorno => retorno.json())
+      .then(retorno_convertido => setCurtidas(retorno_convertido))
+  }
+
+  //busca a lista de reposts atual no backend
+  const buscarReposts = () => {
+    return fetch(API_URL + '/liste/reposts')
+      .then(retorno => retorno.json())
+      .then(retorno_convertido => setReposts(retorno_convertido))
+  }
+
+  //carrega tudo quando o app abre
+  useEffect(() => {
+    buscarPostagens()
+    buscarUsuarios()
+    buscarSeguidores()
+    buscarCurtidas()
+    buscarReposts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   //dados do formulario usuario
   const aoDigitarUsu = (e) => {
@@ -129,7 +130,7 @@ function App() {
           return false;
         }
         else{
-          setPostagens([...postagens, retorno_convertido])
+          buscarPostagens()
           toast.success("Post enviado!")
           limparFormularioPostagem()
           return true;
@@ -151,7 +152,8 @@ function App() {
             return false;
           }
           else{
-            setPostagens([...postagens, retorno_convertido])
+            buscarPostagens()
+            buscarReposts()
             toast.success("Repostado!")
             limparFormularioPostagem()
             return true;
@@ -173,30 +175,8 @@ function App() {
         }
         toast.success(dados.mensagem)
 
-        //cópia do vetor de postagens
-        let vetorPTemp = [...postagens]
-
-        //cópia do vetor de postagens
-        let vetorRTemp = [...reposts]
-
-        //indice
-        let indiceP = vetorPTemp.findIndex((p) => {
-          return p.postagemId === objPostagem.postagemId
-        })
-
-        //indice
-        let indiceR = vetorRTemp.findIndex((p) => {
-          return p.repostagemId = objRepost.id
-        })
-
-        //remover postagem do vetor temporário
-        vetorPTemp.splice(indiceP,1)
-
-        //remover postagem do vetor temporário
-        vetorRTemp.splice(indiceR,1)
-
-        //atualizar o vetor de postagens
-        setPostagens(vetorPTemp)
+        buscarPostagens()
+        buscarReposts()
 
         //limpar o formulario
         limparFormularioPostagem()
@@ -215,7 +195,7 @@ function App() {
           toast.error(retorno_convertido.mensagem)
         }
         else{
-          setPostagens([...postagens, retorno_convertido])
+          buscarPostagens()
           toast.success("Comentário enviado!")
           limparFormularioPostagem()
         }
@@ -236,19 +216,7 @@ function App() {
       }
       toast.success(dados.mensagem)
 
-      //cópia do vetor de postagens
-      let vetorTemp = [...postagens]
-
-      //indice
-      let indice = vetorTemp.findIndex((p) => {
-        return p.codigo = objPostagem.postagemId
-      })
-
-      //remover postagem do vetor temporário
-      vetorTemp.splice(indice,1)
-
-      //atualizar o vetor de postagens
-      setPostagens(vetorTemp)
+      buscarPostagens()
 
       //limpar o formulario
       limparFormularioPostagem()
@@ -271,19 +239,7 @@ function App() {
         //mensagem
         toast.success('Postagem editada!')
 
-        //vetor temporário
-        let vetorTemp = [...postagem]
-
-        //indice
-        let indice = vetorTemp.findIndex((p) => {
-          return p.postagemId === objPostagem.postagemId
-        })
-
-        //alterar postagem do vetor 
-        vetorTemp[indice] = objPostagem
-
-        //atualizar o vetor de postagens
-        setPostagens(vetorTemp)
+        buscarPostagens()
 
         //limpar formulario
         limparFormularioPostagem()
@@ -299,12 +255,13 @@ function App() {
         headers: cabecalhosAutenticados()
       })
       .then(retorno => retorno.json())
-      .then(retorno_convertido => {
-        setObjPostagem(retorno_convertido)
+      .then(() => {
+        buscarPostagens()
+        buscarCurtidas()
       })
-      
+
     }
-  
+
 
   //descurtir
   const descurtirPost = (postagemId, usuarioId, curtidaId) => {
@@ -314,10 +271,11 @@ function App() {
         headers: cabecalhosAutenticados()
       })
       .then(retorno => retorno.json())
-      .then(retorno_convertido => {
-        setObjPostagem(retorno_convertido)
+      .then(() => {
+        buscarPostagens()
+        buscarCurtidas()
       })
-      
+
     }
   
 
@@ -338,7 +296,7 @@ function App() {
         return false;
       }
       else{
-        setUsuarios([...usuarios, retorno_convertido])
+        buscarUsuarios()
         toast.success("Usuário cadastrado!")
         limparFormularioUsuario();
         return true;
@@ -386,19 +344,7 @@ function App() {
         }
         toast.success(dados.mensagem);
 
-        //cópia do vetor de usuarios
-        let vetorTemp = [...usuarios];
-
-        //indice
-        let indice = vetorTemp.findIndex((u) => {
-          return u.usuarioId === objUsuario.usuarioId;
-        });
-
-        //remover usuario do vetor temp
-        vetorTemp.splice(indice, 1);
-
-        //atualizar o vetor de usuarios
-        setUsuarios(vetorTemp);
+        buscarUsuarios()
 
         //limpar formulario
         limparFormularioUsuario();
@@ -421,21 +367,9 @@ function App() {
 
           //mensagem
           toast.success('Perfil editado!')
-  
-          //vetor temporário
-          let vetorTemp = [...usuario]
-  
-          //indice
-          let indice = vetorTemp.findIndex((u) => {
-            return u.usuarioId === objPostagem.usuarioId
-          })
-  
-          //alterar usuario do vetor 
-          vetorTemp[indice] = objPostagem
-  
-          //atualizar o vetor de usuarios
-          setUsuarios(vetorTemp)
-  
+
+          buscarUsuarios()
+
           //limpar formulario
           limparFormularioUsuario()
         }
@@ -454,7 +388,7 @@ function App() {
         toast.error(retorno_convertido.mensagem)
       }
       else{
-        setSeguidores([...usuarios, retorno_convertido])
+        buscarSeguidores()
         toast.success("Usuário seguido!")
         limparFormularioSeguidores()
       }
@@ -477,19 +411,7 @@ function App() {
         }
         toast.success(dados.mensagem);
 
-        //cópia do vetor de usuarios
-        let vetorTemp = [...seguidores];
-
-        //indice
-        let indice = vetorTemp.findIndex((s) => {
-          return s.id === objSeguidor.id;
-        });
-
-        //remover usuario do vetor temp
-        vetorTemp.splice(indice, 1);
-
-        //atualizar o vetor de usuarios
-        setUsuarios(vetorTemp);
+        buscarSeguidores()
 
         //limpar formulario
         limparFormularioSeguidores();
