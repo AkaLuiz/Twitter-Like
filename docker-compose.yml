@@ -1,0 +1,42 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: spring_react
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  backend:
+    build: ./backend
+    environment:
+      MYSQL_HOST: db
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      JWT_SECRET: ${JWT_SECRET:-chave-de-desenvolvimento-trocar-em-producao-0123456789abcdef}
+    ports:
+      - "8090:8090"
+    depends_on:
+      db:
+        condition: service_healthy
+    # o healthcheck do MySQL pode dar positivo durante a fase de inicialização interna dele
+    # (ele reinicia sozinho entre o setup e o servidor definitivo); se o backend subir bem
+    # nessa janela e falhar ao conectar, essa opção faz ele tentar de novo em vez de morrer
+    restart: on-failure:5
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
