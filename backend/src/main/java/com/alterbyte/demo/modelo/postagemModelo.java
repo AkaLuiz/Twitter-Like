@@ -31,7 +31,7 @@ public class postagemModelo {
 	@Column(name = "reposts")
     private int reposts;
 
-    @Column(name = "texto")
+    @Column(name = "texto", length = 280)
     private String texto;
 
 }

@@ -210,8 +210,21 @@
   min-height: 70px;
 }
 
-.compositor .botao-primario {
-  align-self: flex-end;
+.compositor-rodape {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.contador-caracteres {
+  font-size: 12px;
+  color: var(--cor-texto-suave);
+}
+
+.contador-perto-limite {
+  color: var(--cor-acento);
+  font-weight: 700;
 }
 
 .lista-posts {

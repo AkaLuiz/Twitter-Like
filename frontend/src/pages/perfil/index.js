@@ -167,7 +167,7 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                         vetorInvertido.map((obj, indice) => {
 
                             // Encontre uma curtida especifica
-                            const curtida = vetorC.find(like => like.usuarioId === id && like.postagemId === obj.postagemId)
+                            const curtida = vetorC.find(like => like.usuarioId === usuarioLogado && like.postagemId === obj.postagemId)
                             // Id da curtida
                             const idCurtida = curtida ? curtida.id : 'curtida sem Id';
                             // booleano da curtida
@@ -175,7 +175,7 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
 
 
                             // Encontre um repost especifico
-                            const repostagem = vetorR.find(repost => repost.usuarioId === id && repost.id === obj.postagemId)
+                            const repostagem = vetorR.find(repost => repost.usuarioId === usuarioLogado && repost.id === obj.postagemId)
                             // Encontre os reposts do logado
                             const repostagemDono = vetorR.find(repost => repost.usuarioId === obj.usuarioPostagemId && repost.id === obj.postagemId)
                             // Encontre os posts do logado

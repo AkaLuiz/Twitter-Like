@@ -4,6 +4,8 @@ import Logo from '../../components/logo';
 import { useEffect, useState } from 'react';
 import { obterUsuarioLogado, limparUsuarioLogado } from '../../utils/auth';
 
+const LIMITE_CARACTERES_POST = 280;
+
 function Inicio({postar, remover, repostar, desrepostar, vetorR, vetorP, vetorU, vetorC, curtir, descurtir, botaoCurtida, selecionar}) {
 
     const navigate = useNavigate();
@@ -74,9 +76,18 @@ function Inicio({postar, remover, repostar, desrepostar, vetorR, vetorP, vetorU,
                         placeholder='Digita um trem aí...'
                         value={texto}
                         onChange={(e) => setTexto(e.target.value)}
+                        maxLength={LIMITE_CARACTERES_POST}
                         required
                     />
-                    <button className="botao-primario" onClick={handlePostar}>Postar</button>
+                    <div className="compositor-rodape">
+                        <span className={
+                            "contador-caracteres" +
+                            (LIMITE_CARACTERES_POST - texto.length <= 20 ? " contador-perto-limite" : "")
+                        }>
+                            {LIMITE_CARACTERES_POST - texto.length}
+                        </span>
+                        <button className="botao-primario" onClick={handlePostar}>Postar</button>
+                    </div>
                 </div>
                 <PostComp vetorR={vetorR} vetorP={vetorP} vetorU={vetorU} vetorC={vetorC} remover={remover}
                 repostar={repostar} desrepostar={desrepostar} curtir={curtir} descurtir={descurtir}

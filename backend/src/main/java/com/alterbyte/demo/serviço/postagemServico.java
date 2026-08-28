@@ -17,6 +17,8 @@ import com.alterbyte.demo.repositorio.usuarioRepositorio;
 @Service
 public class postagemServico {
 
+    private static final int LIMITE_CARACTERES = 280;
+
     @Autowired
     private postagemRepositorio pr;
 
@@ -62,6 +64,10 @@ public class postagemServico {
             rm.setMensagem("Não pode ser enviada uma mensagem vazia!");
             return new ResponseEntity<respostaModelo>(rm, HttpStatus.BAD_REQUEST);
         }
+        else if(pm.getTexto().length() > LIMITE_CARACTERES){
+            rm.setMensagem("A postagem não pode passar de " + LIMITE_CARACTERES + " caracteres!");
+            return new ResponseEntity<respostaModelo>(rm, HttpStatus.BAD_REQUEST);
+        }
         else if(pm.getUsuarioPostagemId() == null) {
             rm.setMensagem("Você precisa de uma conta para comentar!");
             return new ResponseEntity<respostaModelo>(rm, HttpStatus.BAD_REQUEST);
@@ -87,6 +93,10 @@ public class postagemServico {
 
         if(pm.getTexto().equals("")){
             rm.setMensagem("Não pode ser enviada uma mensagem vazia!");
+            return new ResponseEntity<respostaModelo>(rm, HttpStatus.BAD_REQUEST);
+        }
+        else if(pm.getTexto().length() > LIMITE_CARACTERES){
+            rm.setMensagem("A postagem não pode passar de " + LIMITE_CARACTERES + " caracteres!");
             return new ResponseEntity<respostaModelo>(rm, HttpStatus.BAD_REQUEST);
         }
         else if(pm.getUsuarioPostagemId() == null) {
