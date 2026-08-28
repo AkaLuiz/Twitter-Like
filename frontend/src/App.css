@@ -135,6 +135,12 @@
   gap: 10px;
   font-weight: 600;
   font-size: 14px;
+  min-width: 0;
+}
+
+.usuario-chip span:last-child {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .avatar {
@@ -256,6 +262,9 @@
   font-weight: 700;
   font-size: 14px;
   text-decoration: none;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .post-handle:hover {
@@ -267,6 +276,8 @@
   font-size: 14px;
   line-height: 1.4;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .post-acoes {
@@ -326,6 +337,8 @@
 .cabecalho-perfil h2 {
   margin: 0;
   font-size: 18px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .estatisticas-perfil {
