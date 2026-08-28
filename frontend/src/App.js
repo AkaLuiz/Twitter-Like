@@ -1,6 +1,8 @@
 import './App.css';
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Inicio from './pages/inicio/index';
 import Cadastro from './pages/cadastro/index';
 import Login from './pages/login/index';
@@ -123,12 +125,12 @@ function App() {
       .then(retorno => retorno.json())
       .then(retorno_convertido => {
         if(retorno_convertido.mensagem !== undefined){
-          alert(retorno_convertido.mensagem)
+          toast.error(retorno_convertido.mensagem)
           return false;
         }
         else{
           setPostagens([...postagens, retorno_convertido])
-          alert("Post enviado!")
+          toast.success("Post enviado!")
           limparFormularioPostagem()
           return true;
         }
@@ -145,12 +147,12 @@ function App() {
         .then(retorno => retorno.json())
         .then(retorno_convertido => {
           if(retorno_convertido.mensagem !== undefined){
-            alert(retorno_convertido.mensagem)
+            toast.error(retorno_convertido.mensagem)
             return false;
           }
           else{
             setPostagens([...postagens, retorno_convertido])
-            alert("Repostado!")
+            toast.success("Repostado!")
             limparFormularioPostagem()
             return true;
           }
@@ -162,17 +164,21 @@ function App() {
         method: 'DELETE',
         headers: cabecalhosAutenticados()
       })
-      .then(retorno => retorno.json())
-      .then(retorno_convertido => {
+      .then(async retorno => ({ ok: retorno.ok, dados: await retorno.json() }))
+      .then(({ ok, dados }) => {
         //mensagem
-        alert(retorno_convertido.mensagem)
-  
+        if (!ok) {
+          toast.error(dados.mensagem)
+          return;
+        }
+        toast.success(dados.mensagem)
+
         //cópia do vetor de postagens
         let vetorPTemp = [...postagens]
 
         //cópia do vetor de postagens
         let vetorRTemp = [...reposts]
-  
+
         //indice
         let indiceP = vetorPTemp.findIndex((p) => {
           return p.postagemId === objPostagem.postagemId
@@ -182,16 +188,16 @@ function App() {
         let indiceR = vetorRTemp.findIndex((p) => {
           return p.repostagemId = objRepost.id
         })
-  
+
         //remover postagem do vetor temporário
         vetorPTemp.splice(indiceP,1)
 
         //remover postagem do vetor temporário
         vetorRTemp.splice(indiceR,1)
-  
+
         //atualizar o vetor de postagens
         setPostagens(vetorPTemp)
-  
+
         //limpar o formulario
         limparFormularioPostagem()
       })
@@ -206,11 +212,11 @@ function App() {
       .then(retorno => retorno.json())
       .then(retorno_convertido => {
         if(retorno_convertido.mensagem !== undefined){
-          alert(retorno_convertido.mensagem)
+          toast.error(retorno_convertido.mensagem)
         }
         else{
           setPostagens([...postagens, retorno_convertido])
-          alert("Comentário enviado!")
+          toast.success("Comentário enviado!")
           limparFormularioPostagem()
         }
       })
@@ -221,10 +227,14 @@ function App() {
       method: 'DELETE',
       headers: cabecalhosAutenticados()
     })
-    .then(retorno => retorno.json())
-    .then(retorno_convertido => {
+    .then(async retorno => ({ ok: retorno.ok, dados: await retorno.json() }))
+    .then(({ ok, dados }) => {
       //mensagem
-      alert(retorno_convertido.mensagem)
+      if (!ok) {
+        toast.error(dados.mensagem)
+        return;
+      }
+      toast.success(dados.mensagem)
 
       //cópia do vetor de postagens
       let vetorTemp = [...postagens]
@@ -255,11 +265,11 @@ function App() {
     .then(retorno => retorno.json())
     .then(retorno_convertido => {
       if(retorno_convertido.mensagem !== undefined){
-        alert(retorno_convertido.mensagem)
+        toast.error(retorno_convertido.mensagem)
       } else {
-         
+
         //mensagem
-        alert('Postagem editada!')
+        toast.success('Postagem editada!')
 
         //vetor temporário
         let vetorTemp = [...postagem]
@@ -324,19 +334,18 @@ function App() {
     .then(retorno => retorno.json())
     .then(retorno_convertido => {
       if(retorno_convertido.mensagem !== undefined){
-        alert(retorno_convertido.mensagem)
+        toast.error(retorno_convertido.mensagem)
         return false;
       }
       else{
         setUsuarios([...usuarios, retorno_convertido])
-        console.log("Enviando para o backend:", objUsuario);
-        alert("Usuário cadastrado!")
+        toast.success("Usuário cadastrado!")
         limparFormularioUsuario();
         return true;
       }
     })
     .catch(() => {
-      alert('Erro ao cadastrar usuário.');
+      toast.error('Erro ao cadastrar usuário.');
       return false; // Indica falha
   });
   }
@@ -354,10 +363,10 @@ function App() {
     .then(async retorno => ({ ok: retorno.ok, dados: await retorno.json() }))
     .then(({ ok, dados }) => {
       if (!ok) {
-        alert(dados.mensagem || "Nome e/ou senha incorretos!");
+        toast.error(dados.mensagem || "Nome e/ou senha incorretos!");
         return null;
       }
-      alert("Login efetuado!");
+      toast.success("Login efetuado!");
       return { ...dados.usuario, token: dados.token };
     })
   }
@@ -368,10 +377,14 @@ function App() {
       method: 'delete',
       headers: cabecalhosAutenticados()
     })
-      .then(retorno => retorno.json())
-      .then(retorno_convertido => {
+      .then(async retorno => ({ ok: retorno.ok, dados: await retorno.json() }))
+      .then(({ ok, dados }) => {
         //mensagem
-        alert(retorno_convertido.mensagem);
+        if (!ok) {
+          toast.error(dados.mensagem);
+          return;
+        }
+        toast.success(dados.mensagem);
 
         //cópia do vetor de usuarios
         let vetorTemp = [...usuarios];
@@ -403,11 +416,11 @@ function App() {
       .then(retorno => retorno.json())
       .then(retorno_convertido => {
         if(retorno_convertido.mensagem !== undefined){
-          alert(retorno_convertido.mensagem)
+          toast.error(retorno_convertido.mensagem)
         } else {
-           
+
           //mensagem
-          alert('Perfil editado!')
+          toast.success('Perfil editado!')
   
           //vetor temporário
           let vetorTemp = [...usuario]
@@ -438,11 +451,11 @@ function App() {
     .then(retorno => retorno.json())
     .then(retorno_convertido => {
       if(retorno_convertido.mensagem !== undefined){
-        alert(retorno_convertido.mensagem)
+        toast.error(retorno_convertido.mensagem)
       }
       else{
         setSeguidores([...usuarios, retorno_convertido])
-        alert("Usuário seguido!")
+        toast.success("Usuário seguido!")
         limparFormularioSeguidores()
       }
     })
@@ -455,10 +468,14 @@ function App() {
         body: JSON.stringify(objSeguidor),
         headers: cabecalhosAutenticados()
       })
-      .then(retorno => retorno.json())
-      .then(retorno_convertido => {
+      .then(async retorno => ({ ok: retorno.ok, dados: await retorno.json() }))
+      .then(({ ok, dados }) => {
         //mensagem
-        alert(retorno_convertido.mensagem);
+        if (!ok) {
+          toast.error(dados.mensagem);
+          return;
+        }
+        toast.success(dados.mensagem);
 
         //cópia do vetor de usuarios
         let vetorTemp = [...seguidores];
@@ -503,6 +520,7 @@ function App() {
 
   return (
     <Router >
+        <ToastContainer theme="dark" position="top-right" autoClose={3500}/>
         <Routes>
           <Route path='/' element={<Navigate to={destinoPadrao} replace/>}/>
           <Route path='/inicio' element={<Inicio postar={postarPost} remover={removerPost} repostar={repostarPost} desrepostar={desrepostarPost} vetorR={reposts} vetorP={postagens} vetorU={usuarios} vetorC={curtidas} curtir={curtirPost} descurtir={descurtirPost}/>}/>

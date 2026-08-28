@@ -2,6 +2,18 @@
   color: var(--cor-acento);
 }
 
+/* tema dos toasts (react-toastify) combinando com a paleta do app */
+.Toastify__toast-theme--dark {
+  background: var(--cor-superficie) !important;
+  color: var(--cor-texto) !important;
+  border-radius: var(--raio-medio) !important;
+  font-family: inherit !important;
+}
+
+.Toastify__progress-bar--success {
+  background: var(--cor-acento) !important;
+}
+
 /* telas de autenticação (login/cadastro) */
 .tela-auth {
   min-height: 100vh;
