@@ -4,6 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+# fotos de perfil enviadas em tempo de execução (app.upload.dir)
+/backend/uploads/
+
 ### STS ###
 .apt_generated
 .classpath

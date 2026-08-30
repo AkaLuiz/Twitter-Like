@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {Link} from 'react-router-dom'
 import Avatar from '../avatar';
+import { resolverRepost } from '../../utils/repost';
 
 function PostComp({vetorR, vetorP, vetorU, vetorC, vetorComentarios, remover, repostar, desrepostar, curtir, descurtir, idUsuarioLogado, nomeUsuarioLogado}) {
 
@@ -47,14 +48,12 @@ function PostComp({vetorR, vetorP, vetorU, vetorC, vetorComentarios, remover, re
         <div className="lista-posts">
             {
 
-            vetorInvertido.map((obj, indice) => {
-                
-                // Encontre o usuário com o id correspondente
-                const usuario = vetorU.find(user => user.usuarioId === obj.usuarioPostagemId);
-                const idUsuario = vetorU.find(user => user.id = obj.usuarioPostagemId).id;
-                // Se o usuário for encontrado, pega o nome
-                const nomeUsuario = usuario ? usuario.nome : 'Usuário desconhecido';
+            vetorInvertido.map((obj) => {
 
+                //autor real do texto (o dono do post original, não de quem repostou)
+                const { ehRepost, postagemOriginal, autor, reposter } = resolverRepost(obj, vetorP, vetorR, vetorU);
+                const nomeAutor = autor ? autor.nome : 'Usuário desconhecido';
+                const donoRepost = ehRepost ? 'Repost de: ' + (reposter ? reposter.nome : 'Usuário desconhecido') : 'Post original';
 
                 // Encontre uma curtida especifica
                 const curtida = vetorC.find(like => like.usuarioId === idUsuarioLogado && like.postagemId === obj.postagemId)
@@ -63,46 +62,28 @@ function PostComp({vetorR, vetorP, vetorU, vetorC, vetorComentarios, remover, re
                 // booleano da curtida
                 const botaoCurtida = curtida ? curtida.botaoCurtida : false;
 
+                //repost do usuário logado em cima do post original (pra saber se já repostou e com que id),
+                //independente de qual card (original ou repost de outra pessoa) está sendo mostrado
+                const meuRepost = vetorR.find(repost => repost.usuarioId === idUsuarioLogado && repost.postagemId === postagemOriginal.postagemId)
+                const idRepostagem = meuRepost ? meuRepost.id : null;
+                const botaoRepost = !!meuRepost;
 
-                // Encontre um repost especifico
-                const repostagem = vetorR.find(repost => repost.usuarioId === idUsuarioLogado && repost.id === obj.postagemId)
-                // Encontre os reposts do logado
-                const repostagemDono = vetorR.find(repost => repost.usuarioId === obj.usuarioPostagemId && repost.id === obj.postagemId)
-                // Encontre os posts do logado
-                const postagemDono = vetorP.find(post => post.usuarioPostagemId === idUsuarioLogado && post.usuarioPostagemId === obj.usuarioPostagemId)
-
-                const idRepostagem = repostagem ? repostagem.id : 'respostagem sem Id';
-                const idPostRepostado = repostagem ? repostagem.postagemId : obj.postagemId;
-                const botaoRepost = repostagem ? repostagem.botaoRepost : false;
-                const donoRepost = repostagemDono ? 'Repost de: '+ usuario.nome : 'Post original';
-                const postagemRepostada = vetorP.find(post => post.postagemId ===  idPostRepostado);
-                const idUsuarioDaPostagemRepostada = postagemRepostada ? postagemRepostada.usuarioPostagemId : "Usuário sem Id"
-
-                // Encontre o usuário com o id correspondente
-                const nomeUsuarioRepostado = vetorU.find(user => user.usuarioId === idUsuarioDaPostagemRepostada);
-                // Id do usuario de um repost
-                const nomeUsuarioRepost = nomeUsuarioRepostado ? nomeUsuarioRepostado.nome : 'Usuário desconhecido';
-                // Retorna o nome do usuário que postou o post
-                const UsuarioNome = repostagem ? nomeUsuarioRepost : nomeUsuario;
-                // Retorna o objeto do usuário que postou o post (pra pegar a foto de perfil)
-                const usuarioExibido = repostagem ? nomeUsuarioRepostado : usuario;
-            
-                
+                const postagemDono = obj.usuarioPostagemId === idUsuarioLogado;
 
                     return(
-                        <div className="post-card" key={indice}>
+                        <div className="post-card" key={obj.postagemId}>
                         <p className="post-repost-de">{donoRepost}</p>
                         <div className="post-cabecalho">
-                            <Avatar usuario={usuarioExibido}/>
-                            <Link className="post-handle" to={`/perfil/${idUsuario}`}
-                            state={{nomeUsuario:UsuarioNome, id:idUsuario, usuarioLogado: idUsuarioLogado}}
-                            >@{UsuarioNome}
+                            <Avatar usuario={autor}/>
+                            <Link className="post-handle" to={`/perfil/${postagemOriginal.usuarioPostagemId}`}
+                            state={{nomeUsuario:nomeAutor, id:postagemOriginal.usuarioPostagemId, usuarioLogado: idUsuarioLogado}}
+                            >@{nomeAutor}
                             </Link>
                         </div>
                         <p className="post-texto">{obj.texto}</p>
                         <div className="post-acoes">
                             {
-                                postagemDono && !repostagem
+                                postagemDono && !ehRepost
                                 ?
                                 <button className="post-acao" onClick={() => remover(obj.postagemId)}>Remover</button>
                                 :
@@ -114,12 +95,12 @@ function PostComp({vetorR, vetorP, vetorU, vetorC, vetorComentarios, remover, re
                             {
                                 botaoRepost
                                 ?
-                                <button className="post-acao" onClick={() => handleRepost(botaoRepost, idPostRepostado, idRepostagem)}>
-                                    Remover repost · {obj.reposts}
+                                <button className="post-acao" onClick={() => handleRepost(botaoRepost, postagemOriginal.postagemId, idRepostagem)}>
+                                    Remover repost · {postagemOriginal.reposts}
                                 </button>
                                 :
-                                <button className="post-acao" onClick={() => handleRepost(botaoRepost, idPostRepostado, idRepostagem)}>
-                                    Repostar · {obj.reposts}
+                                <button className="post-acao" onClick={() => handleRepost(botaoRepost, postagemOriginal.postagemId, idRepostagem)}>
+                                    Repostar · {postagemOriginal.reposts}
                                 </button>
                             }
                             <Link className="post-acao" to={`/postagem/${obj.postagemId}`}>{obj.comentarios} comentários</Link>

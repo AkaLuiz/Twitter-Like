@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { obterUsuarioLogado } from '../../utils/auth';
 import Avatar from '../../components/avatar';
+import { resolverRepost } from '../../utils/repost';
 
 const LIMITE_CARACTERES_COMENTARIO = 280;
 
@@ -22,8 +23,12 @@ function Postagem({ vetorP, vetorU, vetorC, vetorR, vetorComentarios, comentar, 
     }, []);
 
     const postagem = vetorP.find(p => p.postagemId === postagemId);
-    const autor = vetorU.find(u => u.usuarioId === postagem?.usuarioPostagemId);
+    //autor real do texto (o dono do post original, não de quem repostou)
+    const { ehRepost, postagemOriginal, autor, reposter } = postagem
+        ? resolverRepost(postagem, vetorP, vetorR, vetorU)
+        : { ehRepost: false, postagemOriginal: null, autor: null, reposter: null };
     const nomeAutor = autor ? autor.nome : 'Usuário desconhecido';
+    const donoRepost = ehRepost ? 'Repost de: ' + (reposter ? reposter.nome : 'Usuário desconhecido') : null;
 
     //acha os comentários dessa postagem: pega os vínculos e resolve o texto de cada um na lista de postagens
     const comentariosDoPost = vetorComentarios
@@ -35,9 +40,10 @@ function Postagem({ vetorP, vetorU, vetorC, vetorR, vetorComentarios, comentar, 
     const idCurtida = curtida ? curtida.id : null;
     const botaoCurtida = curtida ? curtida.botaoCurtida : false;
 
-    const repostagem = vetorR.find(r => r.usuarioId === usuarioLogado && r.id === postagemId);
-    const idRepostagem = repostagem ? repostagem.id : null;
-    const botaoRepost = repostagem ? repostagem.botaoRepost : false;
+    //repost do usuário logado em cima do post original, independente de estar vendo o card original ou um repost
+    const meuRepost = postagemOriginal && vetorR.find(r => r.usuarioId === usuarioLogado && r.postagemId === postagemOriginal.postagemId);
+    const idRepostagem = meuRepost ? meuRepost.id : null;
+    const botaoRepost = !!meuRepost;
 
     const handleCurtir = () => {
         if (!botaoCurtida) curtir(postagemId, usuarioLogado);
@@ -45,8 +51,8 @@ function Postagem({ vetorP, vetorU, vetorC, vetorR, vetorComentarios, comentar, 
     }
 
     const handleRepost = () => {
-        if (!botaoRepost) repostar(postagemId, usuarioLogado);
-        else desrepostar(postagemId, idRepostagem);
+        if (!botaoRepost) repostar(postagemOriginal.postagemId, usuarioLogado);
+        else desrepostar(postagemOriginal.postagemId, idRepostagem);
     }
 
     const handleRemover = () => {
@@ -78,20 +84,21 @@ function Postagem({ vetorP, vetorU, vetorC, vetorR, vetorComentarios, comentar, 
             <Link className="link-sutil" to="/inicio">← início</Link>
 
             <div className="post-card">
+                {donoRepost && <p className="post-repost-de">{donoRepost}</p>}
                 <div className="post-cabecalho">
                     <Avatar usuario={autor}/>
-                    <Link className="post-handle" to={`/perfil/${postagem.usuarioPostagemId}`}>@{nomeAutor}</Link>
+                    <Link className="post-handle" to={`/perfil/${postagemOriginal.usuarioPostagemId}`}>@{nomeAutor}</Link>
                 </div>
                 <p className="post-texto">{postagem.texto}</p>
                 <div className="post-acoes">
-                    {postagem.usuarioPostagemId === usuarioLogado && (
+                    {postagem.usuarioPostagemId === usuarioLogado && !ehRepost && (
                         <button className="post-acao" onClick={handleRemover}>Remover</button>
                     )}
                     <button className="post-acao" onClick={handleCurtir}>
                         {botaoCurtida ? "Descurtir" : "Curtir"} · {postagem.curtidas}
                     </button>
                     <button className="post-acao" onClick={handleRepost}>
-                        {botaoRepost ? "Remover repost" : "Repostar"} · {postagem.reposts}
+                        {botaoRepost ? "Remover repost" : "Repostar"} · {postagemOriginal.reposts}
                     </button>
                     <span className="post-comentarios">{postagem.comentarios} comentários</span>
                 </div>

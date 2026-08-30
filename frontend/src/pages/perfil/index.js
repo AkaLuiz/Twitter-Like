@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { obterUsuarioLogado } from '../../utils/auth';
 import Avatar from '../../components/avatar';
+import { resolverRepost } from '../../utils/repost';
 function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar, desrepostar, enviarFoto, vetorS, vetorP, vetorR, vetorU, vetorC, vetorComentarios}){
 
     const { id: idParam } = useParams();
@@ -95,7 +96,12 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
 
                     <div className="lista-posts">
                     {
-                        vetorInvertido.map((obj, indice) => {
+                        vetorInvertido.map((obj) => {
+
+                            //autor real do texto (o dono do post original, não de quem repostou)
+                            const { ehRepost, postagemOriginal, autor, reposter } = resolverRepost(obj, vetorP, vetorR, vetorU);
+                            const nomeAutor = autor ? autor.nome : 'Usuário desconhecido';
+                            const donoRepost = ehRepost ? 'Repost de: ' + (reposter ? reposter.nome : 'Usuário desconhecido') : 'Post original';
 
                             // Encontre uma curtida especifica
                             const curtida = vetorC.find(like => like.usuarioId === usuarioLogado && like.postagemId === obj.postagemId)
@@ -104,19 +110,12 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                             // booleano da curtida
                             const botaoCurtida = curtida ? curtida.botaoCurtida : false;
 
+                            //repost do usuário logado em cima do post original
+                            const meuRepost = vetorR.find(repost => repost.usuarioId === usuarioLogado && repost.postagemId === postagemOriginal.postagemId)
+                            const idRepostagem = meuRepost ? meuRepost.id : null;
+                            const botaoRepost = !!meuRepost;
 
-                            // Encontre um repost especifico
-                            const repostagem = vetorR.find(repost => repost.usuarioId === usuarioLogado && repost.id === obj.postagemId)
-                            // Encontre os reposts do logado
-                            const repostagemDono = vetorR.find(repost => repost.usuarioId === obj.usuarioPostagemId && repost.id === obj.postagemId)
-                            // Encontre os posts do logado
-                            const postagemDono = vetorP.find(post => post.usuarioPostagemId === usuarioLogado && post.usuarioPostagemId === obj.usuarioPostagemId)
-                            const idRepostagem = repostagem ? repostagem.id : 'respostagem sem Id';
-                            const idPostRepostado = repostagem ? repostagem.postagemId : obj.postagemId;
-                            const botaoRepost = repostagem ? repostagem.botaoRepost : false;
-                            const donoRepost = repostagemDono ? 'Repost de: '+ usuario.nome : 'Post original';
-                            const postagemRepostada = vetorP.find(post => post.postagemId ===  idPostRepostado);
-                            const idUsuarioDaPostagemRepostada = postagemRepostada ? postagemRepostada.usuarioPostagemId : "Usuário sem Id"
+                            const postagemDono = obj.usuarioPostagemId === usuarioLogado;
 
                             return(
                                 <>
@@ -126,16 +125,16 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                                     <div className="post-card">
                                     <p className="post-repost-de">{donoRepost}</p>
                                     <div className="post-cabecalho">
-                                        <Avatar usuario={usuario}/>
-                                        <Link className="post-handle" to={`/perfil/${id}`}
-                                        >@{usuario.nome}
+                                        <Avatar usuario={autor}/>
+                                        <Link className="post-handle" to={`/perfil/${postagemOriginal.usuarioPostagemId}`}
+                                        >@{nomeAutor}
                                         </Link>
                                     </div>
                                     <p className="post-texto">{obj.texto}</p>
 
                                     <div className="post-acoes">
                                     {
-                                        !repostagem
+                                        !ehRepost
                                         ?
                                         <button className="post-acao" onClick={() => remover(obj.postagemId)}>Remover</button>
                                         :
@@ -149,12 +148,12 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                                     {
                                         botaoRepost
                                         ?
-                                        <button className="post-acao" onClick={() => handleRepost(botaoRepost, idPostRepostado, idRepostagem)}>
-                                            Remover repost · {obj.reposts}
+                                        <button className="post-acao" onClick={() => handleRepost(botaoRepost, postagemOriginal.postagemId, idRepostagem)}>
+                                            Remover repost · {postagemOriginal.reposts}
                                         </button>
                                         :
-                                        <button className="post-acao" onClick={() => handleRepost(botaoRepost, idPostRepostado, idRepostagem)}>
-                                            Repostar · {obj.reposts}
+                                        <button className="post-acao" onClick={() => handleRepost(botaoRepost, postagemOriginal.postagemId, idRepostagem)}>
+                                            Repostar · {postagemOriginal.reposts}
                                         </button>
                                     }
 
@@ -188,7 +187,12 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
 
                     <div className="lista-posts">
                     {
-                        vetorInvertido.map((obj, indice) => {
+                        vetorInvertido.map((obj) => {
+
+                            //autor real do texto (o dono do post original, não de quem repostou)
+                            const { ehRepost, postagemOriginal, autor, reposter } = resolverRepost(obj, vetorP, vetorR, vetorU);
+                            const nomeAutor = autor ? autor.nome : 'Usuário desconhecido';
+                            const donoRepost = ehRepost ? 'Repost de: ' + (reposter ? reposter.nome : 'Usuário desconhecido') : 'Post original';
 
                             // Encontre uma curtida especifica
                             const curtida = vetorC.find(like => like.usuarioId === usuarioLogado && like.postagemId === obj.postagemId)
@@ -197,19 +201,12 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                             // booleano da curtida
                             const botaoCurtida = curtida ? curtida.botaoCurtida : false;
 
+                            //repost do usuário logado em cima do post original
+                            const meuRepost = vetorR.find(repost => repost.usuarioId === usuarioLogado && repost.postagemId === postagemOriginal.postagemId)
+                            const idRepostagem = meuRepost ? meuRepost.id : null;
+                            const botaoRepost = !!meuRepost;
 
-                            // Encontre um repost especifico
-                            const repostagem = vetorR.find(repost => repost.usuarioId === usuarioLogado && repost.id === obj.postagemId)
-                            // Encontre os reposts do logado
-                            const repostagemDono = vetorR.find(repost => repost.usuarioId === obj.usuarioPostagemId && repost.id === obj.postagemId)
-                            // Encontre os posts do logado
-                            const postagemDono = vetorP.find(post => post.usuarioPostagemId === id && post.usuarioPostagemId === obj.usuarioPostagemId)
-                            const idRepostagem = repostagem ? repostagem.id : 'respostagem sem Id';
-                            const idPostRepostado = repostagem ? repostagem.postagemId : obj.postagemId;
-                            const botaoRepost = repostagem ? repostagem.botaoRepost : false;
-                            const donoRepost = repostagemDono ? 'Repost de: '+ usuario.nome : 'Post original';
-                            const postagemRepostada = vetorP.find(post => post.postagemId ===  idPostRepostado);
-                            const idUsuarioDaPostagemRepostada = postagemRepostada ? postagemRepostada.usuarioPostagemId : "Usuário sem Id"
+                            const postagemDono = obj.usuarioPostagemId === id;
 
                             return(
                                 <>
@@ -219,9 +216,9 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                                     <div className="post-card">
                                     <p className="post-repost-de">{donoRepost}</p>
                                     <div className="post-cabecalho">
-                                        <Avatar usuario={usuario}/>
-                                        <Link className="post-handle" to={`/perfil/${id}`}
-                                        >@{usuario.nome}
+                                        <Avatar usuario={autor}/>
+                                        <Link className="post-handle" to={`/perfil/${postagemOriginal.usuarioPostagemId}`}
+                                        >@{nomeAutor}
                                         </Link>
                                     </div>
                                     <p className="post-texto">{obj.texto}</p>
@@ -233,12 +230,12 @@ function Perfil({seguir, desseguir, postar, remover, curtir, descurtir, repostar
                                     {
                                         botaoRepost
                                         ?
-                                        <button className="post-acao" onClick={() => handleRepost(botaoRepost, idPostRepostado, idRepostagem)}>
-                                            Remover repost · {obj.reposts}
+                                        <button className="post-acao" onClick={() => handleRepost(botaoRepost, postagemOriginal.postagemId, idRepostagem)}>
+                                            Remover repost · {postagemOriginal.reposts}
                                         </button>
                                         :
-                                        <button className="post-acao" onClick={() => handleRepost(botaoRepost, idPostRepostado, idRepostagem)}>
-                                            Repostar · {obj.reposts}
+                                        <button className="post-acao" onClick={() => handleRepost(botaoRepost, postagemOriginal.postagemId, idRepostagem)}>
+                                            Repostar · {postagemOriginal.reposts}
                                         </button>
                                     }
 
