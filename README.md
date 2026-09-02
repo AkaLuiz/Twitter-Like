@@ -18,6 +18,7 @@ Backend e frontend são dois projetos separados dentro do mesmo repositório (mo
 - Seguir / deixar de seguir, com contador de seguidores/seguindo atualizado em tempo real (sem precisar recarregar a página)
 - Perfil de usuário com foto (upload de imagem de verdade, não link externo)
 - Feed global e perfil individual, cada post mostrando se é original ou repost
+- Paginação do feed com tamanho de página ajustável (10, 15 ou 20 posts por vez)
 - Notificações via toast (sucesso/erro) em vez de `alert()` do navegador
 - Layout responsivo ao conteúdo (textos longos sem espaço quebram linha em vez de estourar a página)
 
@@ -58,6 +59,8 @@ Algumas escolhas que valem uma explicação, principalmente as que fogem do "ób
 **A URL da API é resolvida em tempo de execução, no navegador.** Em vez de hardcodar `localhost`, o frontend monta a URL da API a partir de `window.location.hostname`. Assim o mesmo build funciona tanto pra quem abre em `localhost` quanto pra quem acessa pelo IP da máquina na mesma rede — sem precisar rebuildar nem configurar nada por ambiente.
 
 **CORS aberto (`origins = "*"`).** Deliberado — é uma demo de portfólio, não um serviço com dados sensíveis de terceiros.
+
+**Paginação do feed é client-side, não uma query paginada no backend.** O app já carrega a lista inteira de postagens pra outras finalidades (perfil, comentários, saber se você curtiu/repostou cada post) — e é essa mesma lista que fica sincronizada automaticamente depois de qualquer ação (curtir, comentar, seguir). Paginar de verdade no backend exigiria manter uma segunda fonte de dado (só a página atual) sincronizada à parte, arriscando desalinhar os contadores que já são atualizados em tempo real. Pro volume de posts de uma demo, fatiar a lista já carregada (`.slice()`) no componente do feed entrega a mesma experiência sem esse risco. Se o volume de dados crescesse a ponto de pesar carregar tudo de uma vez, o próximo passo seria migrar pra paginação real com `Pageable`/`Page` do Spring Data.
 
 ## Estrutura
 
@@ -111,7 +114,6 @@ npm start
 
 Coisas que ficaram de fora de propósito, por escopo:
 
-- Sem paginação no feed (busca a lista inteira de postagens de cada vez)
 - Sem testes automatizados
 - Sem migrations de banco (só `ddl-auto=update`)
 - Atualizações do feed acontecem quando *você* interage (posta, curte, comenta) — não há WebSocket nem polling pra ver em tempo real o que outras pessoas estão fazendo
