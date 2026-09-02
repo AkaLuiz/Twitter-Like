@@ -311,6 +311,36 @@
   color: var(--cor-texto-suave);
 }
 
+.post-acao:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.post-acao:disabled:hover {
+  background: var(--cor-superficie-2);
+}
+
+/* paginação do feed */
+.paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.paginacao-info {
+  font-size: 12px;
+  color: var(--cor-texto-suave);
+  white-space: nowrap;
+}
+
+.campo-paginacao {
+  width: auto;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
 /* coluna de busca */
 .coluna-busca {
   display: flex;

@@ -3,11 +3,33 @@ import {Link} from 'react-router-dom'
 import Avatar from '../avatar';
 import { resolverRepost } from '../../utils/repost';
 
+const OPCOES_POR_PAGINA = [10, 15, 20];
+
 function PostComp({vetorR, vetorP, vetorU, vetorC, vetorComentarios, remover, repostar, desrepostar, curtir, descurtir, idUsuarioLogado, nomeUsuarioLogado}) {
 
     //comentários são postagens por baixo dos panos, mas não devem aparecer soltos no feed
     const idsComentarios = new Set(vetorComentarios.map(c => c.comentarioId));
     const vetorInvertido = [...vetorP].filter(p => !idsComentarios.has(p.postagemId)).reverse();
+
+    const [pagina, setPagina] = useState(0);
+    const [porPagina, setPorPagina] = useState(OPCOES_POR_PAGINA[1]);
+    const totalPaginas = Math.max(1, Math.ceil(vetorInvertido.length / porPagina));
+
+    //se um post sumir da lista (removido, ou trocou de página) e a página atual deixar de existir, volta pra última válida
+    useEffect(() => {
+        if (pagina > totalPaginas - 1) {
+            setPagina(Math.max(0, totalPaginas - 1));
+        }
+    }, [totalPaginas, pagina]);
+
+    const inicio = pagina * porPagina;
+    const vetorDaPagina = vetorInvertido.slice(inicio, inicio + porPagina);
+
+    const handleTrocarPorPagina = (novoValor) => {
+        setPorPagina(novoValor);
+        setPagina(0);
+    }
+
     const [idPostagem, setIdPostagem] = useState();
     
     const [objCurtida, setObjCurtida] = useState({
@@ -45,10 +67,11 @@ function PostComp({vetorR, vetorP, vetorU, vetorC, vetorComentarios, remover, re
     }
     
     return (
+        <>
         <div className="lista-posts">
             {
 
-            vetorInvertido.map((obj) => {
+            vetorDaPagina.map((obj) => {
 
                 //autor real do texto (o dono do post original, não de quem repostou)
                 const { ehRepost, postagemOriginal, autor, reposter } = resolverRepost(obj, vetorP, vetorR, vetorU);
@@ -110,6 +133,22 @@ function PostComp({vetorR, vetorP, vetorU, vetorC, vetorComentarios, remover, re
                 })
             }
         </div>
+
+        <div className="paginacao">
+            <button className="post-acao" onClick={() => setPagina(p => Math.max(0, p - 1))} disabled={pagina === 0}>
+                Anterior
+            </button>
+            <span className="paginacao-info">Página {pagina + 1} de {totalPaginas}</span>
+            <button className="post-acao" onClick={() => setPagina(p => Math.min(totalPaginas - 1, p + 1))} disabled={pagina >= totalPaginas - 1}>
+                Próxima
+            </button>
+            <select className="campo campo-paginacao" value={porPagina} onChange={(e) => handleTrocarPorPagina(Number(e.target.value))}>
+                {OPCOES_POR_PAGINA.map(opcao => (
+                    <option key={opcao} value={opcao}>{opcao} por página</option>
+                ))}
+            </select>
+        </div>
+        </>
     );
 }
 
